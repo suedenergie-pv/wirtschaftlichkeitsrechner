@@ -1,0 +1,1202 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PV Wirtschaftlichkeitsrechner</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary:       #0d2137;
+      --primary-mid:   #163350;
+      --primary-light: #1e4976;
+      --solar:         #f59e0b;
+      --solar-light:   #fde68a;
+      --green:         #10b981;
+      --green-light:   #d1fae5;
+      --red:           #ef4444;
+      --red-light:     #fee2e2;
+      --purple:        #8b5cf6;
+      --purple-light:  #ede9fe;
+      --bg:            #f1f5f9;
+      --card:          #ffffff;
+      --text:          #0f172a;
+      --muted:         #64748b;
+      --border:        #e2e8f0;
+      --radius:        12px;
+      --shadow:        0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06);
+      --shadow-lg:     0 8px 24px rgba(0,0,0,.12);
+    }
+
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+    /* ── HEADER ──────────────────────────────── */
+    .site-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 2rem 2rem 0;
+    }
+    .header-top { display: flex; align-items: center; gap: 1rem; max-width: 1240px; margin: 0 auto; }
+    .header-icon { font-size: 2.8rem; line-height: 1; }
+    .header-top h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
+    .header-top p  { opacity: .75; font-size: .9rem; margin-top: .15rem; }
+
+    /* KPI bar */
+    .kpi-strip {
+      max-width: 1240px; margin: 1.5rem auto 0;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      background: rgba(255,255,255,.07);
+      border-radius: var(--radius) var(--radius) 0 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12); border-bottom: none;
+    }
+    .kpi-item { padding: 1rem 1.25rem; border-right: 1px solid rgba(255,255,255,.1); }
+    .kpi-item:last-child { border-right: none; }
+    .kpi-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; opacity: .65; }
+    .kpi-value { font-size: 1.6rem; font-weight: 700; margin: .15rem 0; }
+    .kpi-sub   { font-size: .75rem; opacity: .6; }
+    .kpi-item.accent { background: rgba(245,158,11,.15); }
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .container { max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.5rem; }
+
+    .section-heading {
+      font-size: 1rem; font-weight: 700; color: var(--primary);
+      display: flex; align-items: center; gap: .6rem;
+      margin: 1.75rem 0 1rem;
+    }
+    .section-heading::after { content: ''; flex: 1; height: 2px; background: var(--border); }
+
+    .grid2  { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .grid3  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .grid4  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .grid6  { display: grid; grid-template-columns: repeat(6, 1fr); gap: .9rem; }
+
+    @media (max-width: 900px) {
+      .grid2, .grid3, .grid4, .grid6, .kpi-strip { grid-template-columns: 1fr 1fr; }
+      .grid4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .grid2, .grid3, .grid4, .grid6, .kpi-strip { grid-template-columns: 1fr; }
+      .container { padding: 1rem; }
+      .site-header { padding: 1.25rem 1rem 0; }
+    }
+
+    /* ── CARD ─────────────────────────────────── */
+    .card { background: var(--card); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .card-title {
+      display: flex; align-items: center; gap: .6rem;
+      font-size: .9rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 1.25rem; padding-bottom: .75rem;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .card-title-icon {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0;
+    }
+    .bg-yellow { background: #fef3c7; }
+    .bg-blue   { background: #dbeafe; }
+    .bg-green  { background: var(--green-light); }
+    .bg-purple { background: var(--purple-light); }
+    .bg-red    { background: var(--red-light); }
+
+    /* ── FORM ─────────────────────────────────── */
+    .form-group { margin-bottom: .9rem; }
+    .form-group:last-child { margin-bottom: 0; }
+    label { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+
+    .inp-wrap { position: relative; }
+    .inp-wrap input {
+      width: 100%; padding: .55rem .9rem; padding-right: 3.8rem;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: .95rem; color: var(--text); background: #f8fafc;
+      transition: border-color .18s, box-shadow .18s; -webkit-appearance: none;
+    }
+    .inp-wrap input:focus { outline: none; border-color: var(--solar); box-shadow: 0 0 0 3px rgba(245,158,11,.13); background: white; }
+    .inp-wrap input[readonly] { background: #f1f5f9; color: var(--muted); cursor: default; }
+    .inp-unit {
+      position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+      font-size: .75rem; color: var(--muted); font-weight: 500; pointer-events: none;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    @media (max-width: 400px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* Range */
+    .range-group label { display: flex; justify-content: space-between; align-items: center; }
+    .range-val { font-weight: 700; color: var(--primary); font-size: .85rem; }
+    input[type="range"] { width: 100%; height: 6px; accent-color: var(--solar); margin-top: .4rem; cursor: pointer; }
+
+    /* ── METRIC CHIP ─────────────────────────── */
+    .chip {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 8px; padding: .8rem 1rem;
+    }
+    .chip-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .chip-value { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin: .15rem 0; }
+    .chip-sub   { font-size: .72rem; color: var(--muted); }
+
+    /* ── SAVINGS TABLE ───────────────────────── */
+    .tbl { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .tbl thead th { background: #f8fafc; border-bottom: 2px solid var(--border); padding: .55rem .75rem; text-align: right; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+    .tbl thead th:first-child { text-align: left; }
+    .tbl tbody td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); text-align: right; }
+    .tbl tbody td:first-child { text-align: left; font-weight: 500; }
+    .tbl tbody tr.sum-row td { font-weight: 700; color: var(--green); background: #f0fdf4; }
+    .tbl tbody tr:hover { background: #fafbfc; }
+
+    /* ── COMPARISON BARS ─────────────────────── */
+    .bar-row { margin-bottom: .85rem; }
+    .bar-meta { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: .3rem; }
+    .bar-meta .bn { color: var(--muted); }
+    .bar-meta .bv { font-weight: 600; }
+    .bar-track { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 5px; transition: width .5s ease; }
+    .bar-red    { background: var(--red); }
+    .bar-green  { background: var(--green); }
+    .bar-yellow { background: var(--solar); }
+
+    /* ── PROGRESS ─────────────────────────────── */
+    .prog-track { height: 14px; background: var(--border); border-radius: 7px; overflow: hidden; margin: .5rem 0; }
+    .prog-fill  { height: 100%; background: linear-gradient(90deg, var(--green), var(--solar)); border-radius: 7px; transition: width .5s ease; }
+    .prog-labels{ display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); }
+
+    /* ── LOAN PANEL ──────────────────────────── */
+    .loan-panel {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: var(--radius); padding: 2rem; color: white;
+      margin-top: 1.25rem; box-shadow: var(--shadow-lg);
+    }
+    .loan-panel h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .5rem; }
+    .loan-panel label { color: rgba(255,255,255,.65); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+    .loan-panel .inp-wrap input {
+      background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); color: white;
+    }
+    .loan-panel .inp-wrap input::placeholder { color: rgba(255,255,255,.35); }
+    .loan-panel .inp-wrap input:focus { border-color: var(--solar); background: rgba(255,255,255,.15); box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
+    .loan-panel .inp-wrap input[readonly] { background: rgba(255,255,255,.05); color: rgba(255,255,255,.5); }
+    .loan-panel .inp-unit { color: rgba(255,255,255,.45); }
+
+    .loan-chip {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px; padding: .9rem 1rem;
+    }
+    .loan-chip .lc-label { font-size: .7rem; opacity: .65; text-transform: uppercase; letter-spacing: .05em; }
+    .loan-chip .lc-value { font-size: 1.35rem; font-weight: 700; margin: .15rem 0; }
+    .loan-chip .lc-sub   { font-size: .75rem; opacity: .65; }
+
+    .cf-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      margin-top: 1.25rem; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 1rem;
+    }
+    .cf-item .cf-label { font-size: .72rem; opacity: .65; }
+    .cf-item .cf-value { font-size: 1.15rem; font-weight: 700; margin-top: .15rem; }
+    .cf-pos { color: #34d399; }
+    .cf-neg { color: #f87171; }
+
+    .compare-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      margin-top: 1rem; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 1rem;
+    }
+    .cs-item .cs-label { font-size: .72rem; opacity: .65; }
+    .cs-item .cs-value { font-size: 1.15rem; font-weight: 700; margin-top: .15rem; }
+
+    /* ── YEARLY TABLE ────────────────────────── */
+    .yr-tbl { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .yr-tbl thead th {
+      background: var(--primary); color: white; padding: .55rem .8rem;
+      text-align: right; font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .yr-tbl thead th:first-child { text-align: left; }
+    .yr-tbl tbody td { padding: .5rem .8rem; border-bottom: 1px solid var(--border); text-align: right; }
+    .yr-tbl tbody td:first-child { text-align: left; font-weight: 500; }
+    .yr-tbl tbody tr.be-row { background: #f0fdf4; font-weight: 700; }
+    .yr-tbl tbody tr.be-row td { color: var(--green); }
+    .yr-tbl tbody tr.loan-row { background: #fff7ed; }
+    .yr-tbl tbody tr:hover { background: #fafbfc; }
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+
+    /* ── TOGGLE CHECKBOX ─────────────────────── */
+    .toggle-row { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; }
+    .toggle-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--solar); cursor: pointer; }
+    .toggle-row label { font-size: .85rem; font-weight: 600; color: rgba(255,255,255,.85); cursor: pointer; text-transform: none; letter-spacing: 0; }
+
+    .loan-content { transition: opacity .2s; }
+    .loan-content.hidden { opacity: .35; pointer-events: none; }
+
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .78rem; border-top: 1px solid var(--border); margin-top: 1.5rem; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .25rem;
+      padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 600;
+    }
+    .badge-green  { background: var(--green-light); color: #065f46; }
+    .badge-yellow { background: #fef3c7; color: #92400e; }
+    .badge-red    { background: var(--red-light); color: #991b1b; }
+
+    .overflow-auto { overflow-x: auto; }
+
+  /* ── EXPORT BUTTON ───────────────────────── */
+  .export-btn {
+    position: fixed; bottom: 1.75rem; right: 1.75rem;
+    background: var(--primary); color: white;
+    border: none; border-radius: 50px; padding: .8rem 1.6rem;
+    font-size: .9rem; font-weight: 600; cursor: pointer;
+    box-shadow: var(--shadow-lg); z-index: 1000;
+    display: flex; align-items: center; gap: .5rem;
+    transition: all .18s;
+  }
+  .export-btn:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.25); }
+  .export-btn:active { transform: scale(.97); }
+
+  /* ── PRINT / PDF ─────────────────────────── */
+  #pdf-view { display: none; }
+
+  @media print {
+    .site-header, main, footer, .export-btn { display: none !important; }
+    #pdf-view { display: block !important; font-family: Arial, Helvetica, sans-serif; color: #0f172a; }
+    body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4 portrait; margin: 10mm 14mm; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<header class="site-header">
+  <div class="header-top">
+    <div class="header-icon">☀️</div>
+    <div>
+      <h1>PV Wirtschaftlichkeitsrechner</h1>
+      <p>Photovoltaikanlage · Ersparnisse · Finanzierung</p>
+    </div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi-item">
+      <div class="kpi-label">Ø Alte Stromkosten / Monat</div>
+      <div class="kpi-value" id="kpi-alt">—</div>
+      <div class="kpi-sub" id="kpi-alt-sub">Ø über 20 Jahre</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Neue Kosten gesamt</div>
+      <div class="kpi-value" id="kpi-neu">—</div>
+      <div class="kpi-sub">während Kreditlaufzeit / Monat</div>
+    </div>
+    <div class="kpi-item accent">
+      <div class="kpi-label">Ø Netto-Ersparnis / Monat (20 J.)</div>
+      <div class="kpi-value" id="kpi-ersparnis">—</div>
+      <div class="kpi-sub" id="kpi-ersparnis-sub">inkl. Kredit &amp; Preissteigerung</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Amortisation</div>
+      <div class="kpi-value" id="kpi-amort">—</div>
+      <div class="kpi-sub">Jahre (ohne Kredit)</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN -->
+<main>
+<div class="container">
+
+  <!-- ─── KUNDENDATEN ─────────────────────────── -->
+  <div class="section-heading">👤 Kundendaten</div>
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-title">
+      <span class="card-title-icon bg-blue">👤</span>
+      Kundeninformationen (optional)
+    </div>
+    <div class="grid4">
+      <div class="form-group">
+        <label>Vorname</label>
+        <input type="text" id="kunde-vorname" placeholder="Max" style="width:100%;padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;color:var(--text);background:#f8fafc">
+      </div>
+      <div class="form-group">
+        <label>Nachname</label>
+        <input type="text" id="kunde-nachname" placeholder="Mustermann" style="width:100%;padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;color:var(--text);background:#f8fafc">
+      </div>
+      <div class="form-group">
+        <label>Adresse</label>
+        <input type="text" id="kunde-adresse" placeholder="Musterstr. 1, 12345 Musterstadt" style="width:100%;padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;color:var(--text);background:#f8fafc">
+      </div>
+      <div class="form-group">
+        <label>Bauvorhaben</label>
+        <input type="text" id="kunde-bauvorhaben" placeholder="z. B. Einfamilienhaus, Carport" style="width:100%;padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;color:var(--text);background:#f8fafc">
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── EINGABEN ──────────────────────────────── -->
+  <div class="section-heading">⚡ Eingaben</div>
+
+  <div class="grid2">
+
+    <!-- Stromverbrauch -->
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon bg-yellow">⚡</span>
+        Stromverbrauch &amp; Kosten
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jahresverbrauch</label>
+          <div class="inp-wrap">
+            <input type="number" id="jahresverbrauch" value="6500" min="0" step="100" oninput="recalc()">
+            <span class="inp-unit">kWh</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Strompreis</label>
+          <div class="inp-wrap">
+            <input type="number" id="strompreis" value="0.35" min="0" step="0.01" oninput="recalc()">
+            <span class="inp-unit">€/kWh</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.5rem">
+        <label>Strompreissteigerung p.a.</label>
+        <div class="inp-wrap">
+          <input type="number" id="preissteigerung" value="4.0" min="0" max="10" step="0.5" oninput="recalc()">
+          <span class="inp-unit">%</span>
+        </div>
+      </div>
+      <div class="chip" style="margin-top:.5rem">
+        <div class="chip-label">Aktuelle Jahreskosten</div>
+        <div class="chip-value" id="alteJahreskosten">—</div>
+        <div class="chip-sub" id="alteMonatskosten">—</div>
+      </div>
+    </div>
+
+    <!-- PV Anlage -->
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon bg-blue">🔆</span>
+        PV Anlage Konfiguration
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Modulanzahl</label>
+          <div class="inp-wrap">
+            <input type="number" id="modulanzahl" value="18" min="1" step="1" oninput="recalc()">
+            <span class="inp-unit">Stk</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Modulleistung</label>
+          <div class="inp-wrap">
+            <input type="number" id="modulleistung" value="460" min="100" step="10" oninput="recalc()">
+            <span class="inp-unit">W</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Lichtstunden p.a.</label>
+          <div class="inp-wrap">
+            <input type="number" id="lichtstunden" value="950" min="500" step="10" oninput="recalc()">
+            <span class="inp-unit">h</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Einspeisevergütung</label>
+          <div class="inp-wrap">
+            <input type="number" id="einspeisung" value="0.075" min="0" step="0.001" oninput="recalc()">
+            <span class="inp-unit">€/kWh</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group range-group" style="margin-top:.25rem">
+        <label>
+          Eigennutzungsquote
+          <span class="range-val" id="range-val">55%</span>
+        </label>
+        <input type="range" id="eigennutzung" min="10" max="100" value="55" step="5" oninput="rangeUpd();recalc()">
+      </div>
+    </div>
+
+  </div><!-- /grid2 inputs -->
+
+  <!-- ─── PV ERGEBNISSE ─────────────────────────── -->
+  <div class="section-heading">🔆 Anlage &amp; Stromkostenermittlung</div>
+
+  <div class="grid6">
+    <div class="chip">
+      <div class="chip-label">Anlagenleistung</div>
+      <div class="chip-value" id="anlagenleistung">—</div>
+      <div class="chip-sub">kWp</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Jahresproduktion</div>
+      <div class="chip-value" id="jahresproduktion">—</div>
+      <div class="chip-sub">kWh / Jahr</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Eigenverbrauch</div>
+      <div class="chip-value" id="eigenverbrauch">—</div>
+      <div class="chip-sub">kWh / Jahr</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Restbezug (Netz)</div>
+      <div class="chip-value" id="restbezug">—</div>
+      <div class="chip-sub">kWh / Jahr</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Einspeisung</div>
+      <div class="chip-value" id="einspeisemenge">—</div>
+      <div class="chip-sub">kWh / Jahr</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Neue Stromkosten</div>
+      <div class="chip-value" id="neueMonatskosten">—</div>
+      <div class="chip-sub">netto / Monat</div>
+    </div>
+  </div>
+
+  <!-- ─── ERSPARNISSE ───────────────────────────── -->
+  <div class="section-heading">💰 Ermittlung der Ersparnisse</div>
+
+  <div class="card overflow-auto">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Position</th>
+          <th>kWh / Jahr</th>
+          <th>Preis</th>
+          <th>Monatlich</th>
+          <th>Jährlich</th>
+          <th id="th-20j">20 Jahre *</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Einsparung Eigenverbrauch</td>
+          <td id="s-ev-kwh">—</td>
+          <td id="s-ev-preis">—</td>
+          <td id="s-ev-mon">—</td>
+          <td id="s-ev-jar">—</td>
+          <td id="s-ev-20j">—</td>
+        </tr>
+        <tr>
+          <td>Einspeisung (Vergütung)</td>
+          <td id="s-ei-kwh">—</td>
+          <td id="s-ei-preis">—</td>
+          <td id="s-ei-mon">—</td>
+          <td id="s-ei-jar">—</td>
+          <td id="s-ei-20j">—</td>
+        </tr>
+        <tr class="sum-row">
+          <td>Summe</td>
+          <td>—</td>
+          <td>—</td>
+          <td id="s-sum-mon">—</td>
+          <td id="s-sum-jar">—</td>
+          <td id="s-sum-20j">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem" id="savings-footnote"></div>
+  </div>
+
+  <!-- ─── 20-JAHRES WIRTSCHAFTLICHKEIT ─────────── -->
+  <div class="section-heading">📈 Wirtschaftlichkeit über 20 Jahre</div>
+
+  <div class="grid2">
+
+    <!-- Kosten/Ertrag -->
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon bg-blue">📊</span>
+        Kosten – Ertrag Vergleich
+      </div>
+      <div class="form-group">
+        <label>Anlagenkosten (Investition)</label>
+        <div class="inp-wrap">
+          <input type="number" id="anlagenkosten" value="18000" min="0" step="500" oninput="recalc()">
+          <span class="inp-unit">€</span>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="bar-row">
+          <div class="bar-meta">
+            <span class="bn">Stromkosten ohne PV (20 J.)</span>
+            <span class="bv" id="comp-ohne">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill bar-red" id="bar-ohne" style="width:100%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-meta">
+            <span class="bn">Gesamtkosten mit PV (20 J.)</span>
+            <span class="bv" id="comp-mit">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill bar-green" id="bar-mit" style="width:70%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-meta">
+            <span class="bn">Vorteil durch PV</span>
+            <span class="bv" id="comp-vorteil" style="color:var(--green)">—</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill bar-yellow" id="bar-vorteil" style="width:30%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Break-even -->
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon bg-green">🎯</span>
+        Amortisation &amp; Break-even
+      </div>
+      <div class="grid2" style="gap:.75rem;margin-bottom:1rem">
+        <div class="chip">
+          <div class="chip-label">Break-even (ohne Kredit)</div>
+          <div class="chip-value" id="be-year">—</div>
+          <div class="chip-sub">Jahre</div>
+        </div>
+        <div class="chip">
+          <div class="chip-label">Gesamtvorteil (20 J.)</div>
+          <div class="chip-value" id="gesamtvorteil">—</div>
+          <div class="chip-sub">€</div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:1rem;border:1px solid var(--border)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Fortschritt zum Break-even</div>
+        <div class="prog-labels">
+          <span>0 J.</span>
+          <span id="be-prog-label" style="font-weight:600;color:var(--primary)">—</span>
+          <span>20 J.</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div style="margin-top:.75rem;font-size:.8rem;color:var(--muted)">
+          Rentabilität: <span id="roi-badge">—</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid2 wirt -->
+
+  <!-- ─── DARLEHEN ──────────────────────────────── -->
+  <div class="loan-panel">
+    <div class="toggle-row">
+      <input type="checkbox" id="loan-toggle" checked onchange="toggleLoan()">
+      <label for="loan-toggle">🏦 Mit Finanzierung (Darlehen)</label>
+    </div>
+
+    <div class="loan-content" id="loan-content">
+      <div class="grid2">
+
+        <!-- Loan inputs -->
+        <div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Eigenkapital</label>
+              <div class="inp-wrap">
+                <input type="number" id="eigenkapital" value="0" min="0" step="500" oninput="recalc()">
+                <span class="inp-unit">€</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Darlehensbetrag</label>
+              <div class="inp-wrap">
+                <input type="number" id="darlehensbetrag" value="18000" readonly>
+                <span class="inp-unit">€</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Zinssatz p.a.</label>
+              <div class="inp-wrap">
+                <input type="number" id="zinssatz" value="4.0" min="0" step="0.1" oninput="recalc()">
+                <span class="inp-unit">%</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Laufzeit</label>
+              <div class="inp-wrap">
+                <input type="number" id="laufzeit" value="10" min="1" max="30" step="1" oninput="recalc()">
+                <span class="inp-unit">Jahre</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loan results -->
+        <div class="grid3" style="align-content:start">
+          <div class="loan-chip">
+            <div class="lc-label">Monatliche Rate</div>
+            <div class="lc-value" id="monatlicheRate">—</div>
+            <div class="lc-sub">Annuität</div>
+          </div>
+          <div class="loan-chip">
+            <div class="lc-label">Gesamtzinsen</div>
+            <div class="lc-value" id="gesamtzinsen">—</div>
+            <div class="lc-sub">Zinsaufwand</div>
+          </div>
+          <div class="loan-chip">
+            <div class="lc-label">Gesamtrückzahlung</div>
+            <div class="lc-value" id="gesamtrueckzahlung">—</div>
+            <div class="lc-sub">Tilgung + Zinsen</div>
+          </div>
+        </div>
+
+      </div><!-- /grid2 loan -->
+
+      <!-- Cash flow strip -->
+      <div class="cf-strip">
+        <div class="cf-item">
+          <div class="cf-label">Monatliche Ersparnis (PV)</div>
+          <div class="cf-value cf-pos" id="cf-ersparnis">—</div>
+        </div>
+        <div class="cf-item">
+          <div class="cf-label">Monatliche Kreditrate</div>
+          <div class="cf-value cf-neg" id="cf-rate">—</div>
+        </div>
+        <div class="cf-item">
+          <div class="cf-label">Netto Cashflow / Monat</div>
+          <div class="cf-value" id="cf-netto">—</div>
+        </div>
+      </div>
+
+      <!-- Vergleich alte Stromkosten vs. neue Gesamtkosten -->
+      <div class="compare-strip">
+        <div class="cs-item">
+          <div class="cs-label">Frühere Stromkosten / Monat</div>
+          <div class="cs-value" id="cmp-alt">—</div>
+        </div>
+        <div class="cs-item">
+          <div class="cs-label">Kreditrate + neue Stromkosten</div>
+          <div class="cs-value" id="cmp-neu">—</div>
+        </div>
+        <div class="cs-item">
+          <div class="cs-label">Unterschied (positiv = Vorteil)</div>
+          <div class="cs-value" id="cmp-diff">—</div>
+        </div>
+      </div>
+
+    </div><!-- /loan-content -->
+  </div><!-- /loan-panel -->
+
+  <!-- ─── JAHRESÜBERSICHT ───────────────────────── -->
+  <div class="section-heading">📅 Jahresübersicht (20 Jahre)</div>
+
+  <div class="card overflow-auto">
+    <table class="yr-tbl">
+      <thead>
+        <tr>
+          <th>Jahr</th>
+          <th>Einsparung Eigenverbrauch</th>
+          <th>Einspeisevergütung</th>
+          <th>Gesamtersparnis</th>
+          <th>Kreditrate (Jahr)</th>
+          <th>Netto Cashflow</th>
+          <th>Kumuliert</th>
+        </tr>
+      </thead>
+      <tbody id="yr-tbody"></tbody>
+    </table>
+  </div>
+
+</div><!-- /container -->
+</main>
+
+<footer>
+  PV Wirtschaftlichkeitsrechner · Alle Angaben ohne Gewähr · Strompreis- und Vergütungsänderungen nicht berücksichtigt
+</footer>
+
+<button class="export-btn" onclick="exportPDF()">📄 PDF exportieren</button>
+<div id="pdf-view"></div>
+
+<!-- ═══════════════════════════════════════════════════════ JS -->
+<script>
+  let C = {};
+
+  function rangeUpd() {
+    const v = document.getElementById('eigennutzung').value;
+    document.getElementById('range-val').textContent = v + '%';
+  }
+
+  function toggleLoan() {
+    const on = document.getElementById('loan-toggle').checked;
+    document.getElementById('loan-content').classList.toggle('hidden', !on);
+    recalc();
+  }
+
+  /* Format helpers */
+  const fmtDE = (v, d = 2) => isNaN(v) || !isFinite(v) ? '—'
+    : v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  const eur  = v => fmtDE(v, 2) + ' €';
+  const kwh  = v => fmtDE(v, 0) + ' kWh';
+  const set  = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+
+  function recalc() {
+    /* ── inputs ── */
+    const jv     = +document.getElementById('jahresverbrauch').value  || 0;
+    const sp     = +document.getElementById('strompreis').value       || 0;
+    const ps     = +document.getElementById('preissteigerung').value / 100 || 0;
+    const manz   = +document.getElementById('modulanzahl').value      || 0;
+    const mlei   = +document.getElementById('modulleistung').value    || 0;
+    const lstu   = +document.getElementById('lichtstunden').value     || 0;
+    const enq    = +document.getElementById('eigennutzung').value / 100 || 0;
+    const esv    = +document.getElementById('einspeisung').value      || 0;
+    const ak     = +document.getElementById('anlagenkosten').value    || 0;
+    const ek     = +document.getElementById('eigenkapital').value     || 0;
+    const zsRaw  = +document.getElementById('zinssatz').value         || 0;
+    const zs     = zsRaw / 100 / 12;
+    const lz     = +document.getElementById('laufzeit').value         || 0;
+    const loanOn = document.getElementById('loan-toggle').checked;
+
+    /* ── PV production ── */
+    const anlLei   = manz * mlei / 1000;
+    const jahrProd = anlLei * lstu;
+    const eigVerb  = Math.min(jv * enq, jahrProd);
+    const restbez  = jv - eigVerb;
+    const einspm   = Math.max(0, jahrProd - eigVerb);
+
+    /* ── year-1 costs & savings ── */
+    const alteJk   = jv * sp;
+    const alteMk   = alteJk / 12;
+    const neueJk   = restbez * sp - einspm * esv;
+    const neueMk   = neueJk / 12;
+    const ersEV_j  = eigVerb * sp;
+    const ersEV_m  = ersEV_j / 12;
+    const ersEi_j  = einspm * esv;
+    const ersEi_m  = ersEi_j / 12;
+    const ersSum_m = ersEV_m + ersEi_m;
+    const ersSum_j = ersEV_j + ersEi_j;
+
+    /* ── loan ── */
+    const darlehn = Math.max(0, ak - ek);
+    document.getElementById('darlehensbetrag').value = darlehn.toFixed(0);
+    let rate = 0, zinsenGes = 0, rueckGes = 0;
+    if (loanOn && darlehn > 0 && lz > 0) {
+      const n = lz * 12;
+      rate      = zs > 0
+        ? darlehn * (zs * Math.pow(1+zs,n)) / (Math.pow(1+zs,n)-1)
+        : darlehn / n;
+      rueckGes  = rate * n;
+      zinsenGes = rueckGes - darlehn;
+    }
+    const nettoMk   = ersSum_m - rate;
+    const neuGesamt = (loanOn ? rate : 0) + neueMk;
+
+    /* ── 20-year with price growth ── */
+    let ohne20 = 0, mit20Strm = 0, ersEV_20j = 0, totalNet20 = 0;
+    for (let y = 1; y <= 20; y++) {
+      const spY  = sp * Math.pow(1+ps, y-1);
+      ohne20    += jv * spY;
+      mit20Strm += restbez * spY - einspm * esv;
+      ersEV_20j += eigVerb * spY;
+      const ersY  = eigVerb * spY + einspm * esv;
+      const rateJ = (loanOn && y <= lz) ? rate * 12 : 0;
+      totalNet20 += ersY - rateJ;
+    }
+    const mit20        = ak + mit20Strm;
+    const vorteil      = ohne20 - mit20;
+    const ersEi_20j    = einspm * esv * 20;
+    const ersSum_20j   = ersEV_20j + ersEi_20j;
+    const avgNetMonthly = totalNet20 / 20 / 12;
+    const avgAlteMk     = ohne20 / 20 / 12;
+    const cmpDiff       = avgAlteMk - neuGesamt;
+
+    /* ── break-even (iterative, no loan) ── */
+    let kumBE = -ak, be_plain = Infinity;
+    for (let y = 1; y <= 40; y++) {
+      kumBE += eigVerb * sp * Math.pow(1+ps, y-1) + einspm * esv;
+      if (kumBE >= 0) { be_plain = y; break; }
+    }
+
+    /* ── save for PDF ── */
+    C = { jv, sp, ps, manz, mlei, lstu, enq, esv, ak, ek, zsRaw, lz, loanOn,
+          anlLei, jahrProd, eigVerb, restbez, einspm,
+          alteJk, alteMk, neueJk, neueMk,
+          ersEV_j, ersEV_m, ersEi_j, ersEi_m, ersSum_m, ersSum_j,
+          ersEV_20j, ersEi_20j, ersSum_20j,
+          ohne20, mit20, vorteil, be_plain, avgNetMonthly, avgAlteMk,
+          darlehn, rate, zinsenGes, rueckGes, nettoMk, neuGesamt, cmpDiff };
+
+    /* ── KPI bar ── */
+    set('kpi-alt',       eur(avgAlteMk));
+    const altSub = document.getElementById('kpi-alt-sub');
+    if (altSub) altSub.textContent = ps > 0
+      ? `Ø 20 J. inkl. ${(ps*100).toFixed(1)}% Preissteigerung`
+      : 'Ø über 20 Jahre (ohne Preissteigerung)';
+    set('kpi-neu',       eur(neuGesamt));
+    set('kpi-ersparnis', eur(avgNetMonthly));
+    set('kpi-amort',     be_plain <= 30 ? be_plain.toFixed(0) : '>30');
+    const sub = document.getElementById('kpi-ersparnis-sub');
+    if (sub) sub.textContent = ps > 0
+      ? `inkl. Kredit & ${(ps*100).toFixed(1)}% Preissteigerung`
+      : 'inkl. Kredit (ohne Preissteigerung)';
+
+    /* ── section 1 ── */
+    set('alteJahreskosten', eur(alteJk));
+    set('alteMonatskosten', eur(alteMk) + ' / Monat');
+
+    /* ── section 2 chips ── */
+    set('anlagenleistung',  fmtDE(anlLei, 2) + ' kWp');
+    set('jahresproduktion', kwh(jahrProd));
+    set('eigenverbrauch',   kwh(eigVerb));
+    set('restbezug',        kwh(restbez));
+    set('einspeisemenge',   kwh(einspm));
+    set('neueMonatskosten', eur(neueMk));
+
+    /* ── savings table ── */
+    set('s-ev-kwh',   kwh(eigVerb));
+    set('s-ev-preis', fmtDE(sp, 3) + ' €/kWh');
+    set('s-ev-mon',   eur(ersEV_m));
+    set('s-ev-jar',   eur(ersEV_j));
+    set('s-ev-20j',   eur(ersEV_20j));
+    set('s-ei-kwh',   kwh(einspm));
+    set('s-ei-preis', fmtDE(esv, 3) + ' €/kWh');
+    set('s-ei-mon',   eur(ersEi_m));
+    set('s-ei-jar',   eur(ersEi_j));
+    set('s-ei-20j',   eur(ersEi_20j));
+    set('s-sum-mon',  eur(ersSum_m));
+    set('s-sum-jar',  eur(ersSum_j));
+    set('s-sum-20j',  eur(ersSum_20j));
+    const th20j = document.getElementById('th-20j');
+    if (th20j) th20j.textContent = ps > 0 ? '20 Jahre *' : '20 Jahre';
+    const fn = document.getElementById('savings-footnote');
+    if (fn) fn.textContent = ps > 0
+      ? `* 20-Jahres-Gesamtwert des Eigenverbrauchsvorteils mit ${(ps*100).toFixed(1)}% jährlicher Strompreissteigerung. Einspeisevergütung konstant.`
+      : '';
+
+    /* ── comparison bars ── */
+    set('comp-ohne',    eur(ohne20));
+    set('comp-mit',     eur(mit20));
+    set('comp-vorteil', eur(vorteil));
+    const bMax = Math.max(ohne20, mit20, 1);
+    document.getElementById('bar-ohne').style.width    = (ohne20 / bMax * 100) + '%';
+    document.getElementById('bar-mit').style.width     = (mit20  / bMax * 100) + '%';
+    document.getElementById('bar-vorteil').style.width = (Math.abs(vorteil) / bMax * 100) + '%';
+
+    /* ── break-even ── */
+    set('be-year',       be_plain <= 30 ? be_plain.toFixed(0) : '>30');
+    set('gesamtvorteil', eur(vorteil));
+    const prog = Math.min(100, (be_plain / 20) * 100);
+    document.getElementById('prog-fill').style.width = prog + '%';
+    set('be-prog-label', be_plain <= 30
+      ? 'Break-even: Jahr ' + be_plain.toFixed(0)
+      : 'Kein Break-even in 30 J.');
+    const roiPct   = ak > 0 ? vorteil / ak * 100 : 0;
+    const roiBadge = document.getElementById('roi-badge');
+    if (roiBadge) {
+      const cls = roiPct > 50 ? 'badge-green' : roiPct > 0 ? 'badge-yellow' : 'badge-red';
+      roiBadge.innerHTML = `<span class="badge ${cls}">ROI ${fmtDE(roiPct, 1)} %</span>`;
+    }
+
+    /* ── loan ── */
+    set('monatlicheRate',     eur(rate));
+    set('gesamtzinsen',       eur(zinsenGes));
+    set('gesamtrueckzahlung', eur(rueckGes));
+    set('cf-ersparnis', eur(ersSum_m));
+    set('cf-rate',      '− ' + eur(rate));
+    const cfEl = document.getElementById('cf-netto');
+    if (cfEl) {
+      cfEl.textContent = (nettoMk >= 0 ? '+ ' : '− ') + eur(Math.abs(nettoMk));
+      cfEl.className   = 'cf-value ' + (nettoMk >= 0 ? 'cf-pos' : 'cf-neg');
+    }
+    set('cmp-alt', eur(avgAlteMk));
+    set('cmp-neu', eur(neuGesamt));
+    const diffEl = document.getElementById('cmp-diff');
+    if (diffEl) {
+      diffEl.textContent = (cmpDiff >= 0 ? '+ ' : '− ') + eur(Math.abs(cmpDiff));
+      diffEl.style.color = cmpDiff >= 0 ? '#34d399' : '#f87171';
+    }
+
+    buildYearTable();
+  }
+
+  function buildYearTable() {
+    const { eigVerb, einspm, sp, ps, esv, ek, ak, rate, lz, loanOn, zinsenGes } = C;
+    const tbody = document.getElementById('yr-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const startKap = loanOn ? -(ek + zinsenGes) : -ak;
+    let kum = startKap, beFound = false;
+    for (let y = 1; y <= 20; y++) {
+      const spY       = sp * Math.pow(1+ps, y-1);
+      const ersEV_y   = eigVerb * spY;
+      const ersEi_y   = einspm * esv;
+      const ersSum_y  = ersEV_y + ersEi_y;
+      const rateJahr  = (loanOn && y <= lz) ? rate * 12 : 0;
+      const nettoJahr = ersSum_y - rateJahr;
+      kum += nettoJahr;
+      const isLoan = loanOn && y <= lz;
+      const isBE   = !beFound && kum >= 0;
+      if (isBE) beFound = true;
+      const tr = document.createElement('tr');
+      if (isBE) tr.className = 'be-row';
+      else if (isLoan) tr.className = 'loan-row';
+      tr.innerHTML = `
+        <td>Jahr ${y}${isBE ? ' ✓ Break-even' : ''}</td>
+        <td>${fmtDE(ersEV_y,2)} €</td>
+        <td>${fmtDE(ersEi_y,2)} €</td>
+        <td>${fmtDE(ersSum_y,2)} €</td>
+        <td>${rateJahr > 0 ? '− '+fmtDE(rateJahr,2)+' €' : '—'}</td>
+        <td class="${nettoJahr>=0?'pos':'neg'}">${(nettoJahr>=0?'+ ':'− ')+fmtDE(Math.abs(nettoJahr),2)+' €'}</td>
+        <td class="${kum>=0?'pos':'neg'}" style="font-weight:600">${(kum>=0?'+ ':'− ')+fmtDE(Math.abs(kum),2)+' €'}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  /* ══════════════════════════════════════════ PDF EXPORT */
+  function exportPDF() {
+    document.getElementById('pdf-view').innerHTML = buildPDF();
+    window.print();
+  }
+
+  function buildPDF() {
+    const d = C;
+    const loanOn = d.loanOn;
+    const date = new Date().toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+    const fe  = (v, dec=2) => isNaN(v)||!isFinite(v) ? '--'
+      : v.toLocaleString('de-DE',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + ' €';
+    const fk  = v => Math.round(v).toLocaleString('de-DE') + ' kWh';
+    const fn  = (v,dec=2) => v.toLocaleString('de-DE',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    const pct = v => fn(v,1) + ' %';
+    const sec = extra => 'page-break-inside:avoid;break-inside:avoid;' + (extra||'');
+    const ps100 = (d.ps*100).toFixed(1);
+
+    /* yearly rows with growing prices */
+    const startKap = loanOn ? -(d.ek + d.zinsenGes) : -d.ak;
+    let kum = startKap, beFound = false, yearRows = '';
+    for (let y = 1; y <= 20; y++) {
+      const spY     = d.sp * Math.pow(1 + d.ps, y - 1);
+      const ersEV_y = d.eigVerb * spY;
+      const ersEi_y = d.einspm * d.esv;
+      const ersY    = ersEV_y + ersEi_y;
+      const rJ      = (loanOn && y <= d.lz) ? d.rate * 12 : 0;
+      const nJ      = ersY - rJ;
+      kum += nJ;
+      const isBE   = !beFound && kum >= 0; if (isBE) beFound = true;
+      const isLoan = loanOn && y <= d.lz;
+      const bg = isBE ? '#d1fae5' : isLoan ? '#fff7ed' : (y%2===0?'#f8fafc':'white');
+      yearRows += '<tr style="background:' + bg + '">'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;font-weight:' + (isBE?700:400) + '">' + y + (isBE?' ✓&nbsp;Break-even':'') + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right">' + fe(ersEV_y) + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right">' + fe(ersEi_y) + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600">' + fe(ersY) + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right">' + (rJ>0?fe(rJ):'--') + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:' + (nJ>=0?'#065f46':'#991b1b') + '">' + fe(nJ) + '</td>'
+        + '<td style="padding:1.8mm 3mm;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:' + (kum>=0?'#065f46':'#991b1b') + '">' + fe(kum) + '</td>'
+        + '</tr>';
+    }
+
+    /* financing block */
+    const finBlock = loanOn
+      ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4mm">'
+        + '<table style="width:100%;font-size:9pt;border-collapse:collapse">'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Eigenkapital</td><td style="text-align:right;font-weight:600">' + fe(d.ek) + '</td></tr>'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Darlehensbetrag</td><td style="text-align:right;font-weight:600">' + fe(d.darlehn) + '</td></tr>'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Zinssatz p.a.</td><td style="text-align:right;font-weight:600">' + pct(d.zsRaw) + '</td></tr>'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Laufzeit</td><td style="text-align:right;font-weight:600">' + d.lz + '&nbsp;Jahre</td></tr>'
+        + '<tr style="border-top:1.5px solid #e2e8f0"><td style="color:#64748b;padding:2mm 0 0;font-weight:600">Monatliche Rate</td><td style="text-align:right;font-weight:700;font-size:11pt">' + fe(d.rate) + '</td></tr>'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Gesamtzinsen</td><td style="text-align:right;font-weight:600;color:#ef4444">' + fe(d.zinsenGes) + '</td></tr>'
+        + '<tr><td style="color:#64748b;padding:1.5mm 0">Gesamtrückzahlung</td><td style="text-align:right;font-weight:600">' + fe(d.rueckGes) + '</td></tr>'
+        + '</table>'
+        + '<div>'
+        + '<div style="' + sec('background:#1e4976;color:white;border-radius:3mm;padding:4mm;margin-bottom:3mm') + '">'
+        + '<div style="font-size:7.5pt;opacity:.75;margin-bottom:1mm">Ø NETTO / MONAT (20 J.)</div>'
+        + '<div style="font-size:15pt;font-weight:700;color:' + (d.avgNetMonthly>=0?'#34d399':'#f87171') + '">' + fe(d.avgNetMonthly) + '</div>'
+        + '<div style="font-size:7.5pt;opacity:.7;margin-top:1mm">Ø Ersparnis abzgl. Rate über 20 Jahre</div>'
+        + '</div>'
+        + '<div style="' + sec('background:#f8fafc;border:1px solid #e2e8f0;border-radius:3mm;padding:4mm') + '">'
+        + '<div style="font-size:7.5pt;color:#64748b;margin-bottom:2mm;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Vergleich Monatlich (Ø 20 J. vs. Jahr 1)</div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:1.5mm"><span style="color:#64748b">Ø Frühere Stromkosten (20 J.)</span><span style="font-weight:600">' + fe(d.avgAlteMk) + '</span></div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:1.5mm"><span style="color:#64748b">Rate + neue Stromkosten</span><span style="font-weight:600">' + fe(d.neuGesamt) + '</span></div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:9pt;border-top:1px solid #e2e8f0;padding-top:1.5mm"><span style="color:#64748b;font-weight:600">Unterschied</span><span style="font-weight:700;color:' + (d.cmpDiff>=0?'#065f46':'#ef4444') + '">' + (d.cmpDiff>=0?'+&nbsp;':'') + fe(d.cmpDiff) + '</span></div>'
+        + '</div></div></div>'
+      : '<div style="' + sec('background:#f0fdf4;border:2px solid #86efac;border-radius:4mm;padding:5mm;display:flex;align-items:center;gap:5mm') + '">'
+        + '<div style="font-size:2.2rem;line-height:1">✅</div>'
+        + '<div><div style="font-size:11pt;font-weight:700;color:#065f46;margin-bottom:1.5mm">Kauf aus Eigenkapital – keine Finanzierung</div>'
+        + '<div style="font-size:9pt;color:#16a34a;line-height:1.6">'
+        + 'Volle Investition: <b>' + fe(d.ak) + '</b> &nbsp;·&nbsp; '
+        + 'Break-even: <b>' + (d.be_plain<=30?fn(d.be_plain,0)+' Jahre':'>30 Jahre') + '</b> &nbsp;·&nbsp; '
+        + 'Gesamtvorteil (20&nbsp;J.): <b>' + fe(d.vorteil) + '</b><br>'
+        + 'Ø Netto / Monat (20 J.): <b>' + fe(d.avgNetMonthly) + '</b> &nbsp;·&nbsp; '
+        + 'Jahr 1 Ersparnis: <b>' + fe(d.ersSum_j) + '</b> &nbsp;·&nbsp; Keine Zinskosten'
+        + '</div></div></div>';
+
+    const hintKum = loanOn
+      ? 'Kumulierung startet bei −' + fe(d.ek+d.zinsenGes) + ' (Eigenkapital + Gesamtzinsen). Orange = Kreditlaufzeit (' + d.lz + '&nbsp;J.).'
+      : 'Kumulierung startet bei −' + fe(d.ak) + ' (Anlagenkosten, Eigenkauf ohne Kredit).';
+    const psNote = d.ps > 0
+      ? '&nbsp;·&nbsp;Strompreissteigerung ' + ps100 + '&nbsp;% p.a. (Einspeisung konstant)'
+      : '';
+
+    /* customer data */
+    const kVorname    = document.getElementById('kunde-vorname').value.trim();
+    const kNachname   = document.getElementById('kunde-nachname').value.trim();
+    const kAdresse    = document.getElementById('kunde-adresse').value.trim();
+    const kBauvorhaben= document.getElementById('kunde-bauvorhaben').value.trim();
+    const kName = (kVorname + ' ' + kNachname).trim();
+
+    const titlePage = '<div style="' + sec('page-break-after:always;min-height:250mm;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif') + '">'
+
+      /* dark header band */
+      + '<div style="' + sec('background:#0d2137;color:white;padding:10mm 12mm 8mm;border-radius:4mm 4mm 0 0') + '">'
+      + '<div style="font-size:11pt;opacity:.6;margin-bottom:2mm;text-transform:uppercase;letter-spacing:.08em">Wirtschaftlichkeitsanalyse</div>'
+      + '<div style="font-size:22pt;font-weight:700;margin-bottom:1mm">Photovoltaikanlage</div>'
+      + '<div style="font-size:9pt;opacity:.55">Erstellt am ' + date + '</div>'
+      + '</div>'
+
+      /* customer info block */
+      + '<div style="' + sec('border:1px solid #e2e8f0;border-top:none;border-radius:0 0 4mm 4mm;padding:8mm 12mm;background:#fafcff') + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:4mm;padding-bottom:2mm;border-bottom:2px solid #e2e8f0">Erstellt für</div>'
+      + '<table style="font-size:10pt;border-collapse:collapse;width:100%;margin-bottom:6mm">'
+      + '<tr><td style="color:#64748b;padding:2mm 4mm 2mm 0;width:35mm;font-size:9pt">Name</td><td style="font-weight:600;padding:2mm 0;font-size:11pt">' + (kName||'&nbsp;') + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:2mm 4mm 2mm 0;font-size:9pt">Adresse</td><td style="font-weight:500;padding:2mm 0">' + (kAdresse||'&nbsp;') + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:2mm 4mm 2mm 0;font-size:9pt">Bauvorhaben</td><td style="font-weight:500;padding:2mm 0">' + (kBauvorhaben||'&nbsp;') + '</td></tr>'
+      + '</table>'
+
+      /* divider */
+      + '<div style="border-top:2px solid #e2e8f0;margin-bottom:6mm"></div>'
+
+      /* explanation */
+      + '<div style="font-size:9pt;color:#334155;line-height:1.7;max-width:150mm">'
+      + '<b style="font-size:10pt;color:#0d2137;display:block;margin-bottom:2mm">Über diese Analyse</b>'
+      + 'Diese Wirtschaftlichkeitsanalyse zeigt, wie sich die Investition in eine Photovoltaikanlage über 20 Jahre rechnet. '
+      + 'Sie berücksichtigt den Eigenverbrauch der erzeugten Energie, die Einspeisevergütung für überschüssigen Strom sowie '
+      + (d.loanOn
+          ? 'die gewählte Darlehensfinanzierung mit allen Zins- und Tilgungskosten. '
+          : 'die Anschaffungskosten bei Eigenkauf ohne Fremdfinanzierung. ')
+      + 'Die Strompreissteigerung von ' + ps100 + '&nbsp;% p.a. ist in den 20-Jahres-Werten eingerechnet. '
+      + 'Alle Berechnungen sind indikativ und ohne Gewähr.'
+      + '</div>'
+
+      /* key numbers strip */
+      + '<div style="' + sec('display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-top:8mm') + '">'
+      + '<div style="background:#0d2137;color:white;border-radius:3mm;padding:4mm;text-align:center">'
+      + '<div style="font-size:7pt;opacity:.6;text-transform:uppercase;letter-spacing:.05em">Anlagenleistung</div>'
+      + '<div style="font-size:15pt;font-weight:700;margin:.5mm 0">' + fn(d.anlLei,2) + ' kWp</div>'
+      + '<div style="font-size:7pt;opacity:.55">' + d.manz + ' × ' + d.mlei + ' W</div>'
+      + '</div>'
+      + '<div style="background:#0d2137;color:white;border-radius:3mm;padding:4mm;text-align:center">'
+      + '<div style="font-size:7pt;opacity:.6;text-transform:uppercase;letter-spacing:.05em">Investition</div>'
+      + '<div style="font-size:15pt;font-weight:700;margin:.5mm 0">' + fe(d.ak) + '</div>'
+      + '<div style="font-size:7pt;opacity:.55">' + (d.loanOn ? 'davon ' + fe(d.ek) + ' Eigenkapital' : 'Eigenkauf') + '</div>'
+      + '</div>'
+      + '<div style="background:#0d2137;color:white;border-radius:3mm;padding:4mm;text-align:center">'
+      + '<div style="font-size:7pt;opacity:.6;text-transform:uppercase;letter-spacing:.05em">Ø Netto / Monat</div>'
+      + '<div style="font-size:15pt;font-weight:700;margin:.5mm 0;color:' + (d.avgNetMonthly>=0?'#34d399':'#f87171') + '">' + fe(d.avgNetMonthly) + '</div>'
+      + '<div style="font-size:7pt;opacity:.55">Ø über 20 Jahre</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>'   /* end customer info block */
+      + '</div>';  /* end title page */
+
+    return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#0f172a">'
+      + titlePage
+
+      + '<div style="' + sec('background:#0d2137;color:white;padding:6mm 8mm;border-radius:4mm;margin-bottom:5mm;display:flex;justify-content:space-between;align-items:center') + '">'
+      + '<div><div style="font-size:15pt;font-weight:700">&#9728; PV Wirtschaftlichkeitsrechner</div>'
+      + '<div style="font-size:8.5pt;opacity:.7;margin-top:1.5mm">Wirtschaftlichkeitsanalyse Photovoltaikanlage</div></div>'
+      + '<div style="text-align:right;font-size:8.5pt;opacity:.75">Erstellt am<br><b style="font-size:10pt">' + date + '</b></div>'
+      + '</div>'
+
+      + '<div style="' + sec('display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-bottom:4mm') + '">'
+
+      + '<div style="' + sec('border:1px solid #e2e8f0;border-radius:3mm;padding:4mm') + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid #f1f5f9">Ihre Anlage</div>'
+      + '<table style="width:100%;font-size:9pt;border-collapse:collapse">'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Jahresverbrauch</td><td style="text-align:right;font-weight:600">' + fk(d.jv) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Strompreis (Jahr 1)</td><td style="text-align:right;font-weight:600">' + fn(d.sp,3) + '&nbsp;€/kWh</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Preissteigerung p.a.</td><td style="text-align:right;font-weight:600">' + ps100 + '&nbsp;%</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Module</td><td style="text-align:right;font-weight:600">' + d.manz + '&nbsp;×&nbsp;' + d.mlei + '&nbsp;W</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Anlagenleistung</td><td style="text-align:right;font-weight:600">' + fn(d.anlLei,2) + '&nbsp;kWp</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Lichtstunden p.a.</td><td style="text-align:right;font-weight:600">' + fn(d.lstu,0) + '&nbsp;h</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Jahresproduktion</td><td style="text-align:right;font-weight:600">' + fk(d.jahrProd) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Eigennutzungsquote</td><td style="text-align:right;font-weight:600">' + Math.round(d.enq*100) + '&nbsp;%</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Einspeisevergütung</td><td style="text-align:right;font-weight:600">' + fn(d.esv,3) + '&nbsp;€/kWh</td></tr>'
+      + '<tr style="border-top:1.5px solid #f1f5f9"><td style="color:#64748b;padding:2mm 0 0;font-weight:600">Investition (Anlage)</td><td style="text-align:right;font-weight:700;font-size:11pt">' + fe(d.ak) + '</td></tr>'
+      + '</table></div>'
+
+      + '<div style="' + sec('border:1px solid #e2e8f0;border-radius:3mm;padding:4mm') + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid #f1f5f9">Kernergebnisse</div>'
+      + '<div style="' + sec('display:grid;grid-template-columns:1fr 1fr;gap:2mm;margin-bottom:3mm') + '">'
+      + '<div style="background:#fee2e2;border-radius:2mm;padding:3mm;text-align:center"><div style="font-size:7pt;color:#991b1b;font-weight:600">Ø ALT / MONAT (20 J.)</div><div style="font-size:13pt;font-weight:700;color:#991b1b;margin-top:.5mm">' + fe(d.avgAlteMk) + '</div><div style="font-size:7pt;color:#b91c1c;margin-top:.5mm">' + fe(d.alteJk) + '&nbsp;/ Jahr 1</div></div>'
+      + '<div style="background:#d1fae5;border-radius:2mm;padding:3mm;text-align:center"><div style="font-size:7pt;color:#065f46;font-weight:600">NEU / MONAT</div><div style="font-size:13pt;font-weight:700;color:#065f46;margin-top:.5mm">' + fe(d.neueMk) + '</div><div style="font-size:7pt;color:#047857;margin-top:.5mm">' + fe(d.neueJk) + '&nbsp;/ Jahr</div></div>'
+      + '</div>'
+      + '<div style="' + sec('background:#0d2137;color:white;border-radius:2mm;padding:3.5mm;text-align:center;margin-bottom:3mm') + '">'
+      + '<div style="font-size:7pt;opacity:.7">Ø NETTO-ERSPARNIS / MONAT (20 J.)</div>'
+      + '<div style="font-size:16pt;font-weight:700;margin:.5mm 0">' + fe(d.avgNetMonthly) + '</div>'
+      + '<div style="font-size:7pt;opacity:.7">Ø über 20 Jahre' + (d.ps>0?' inkl. '+ps100+'% Preissteigerung':'') + '</div>'
+      + '</div>'
+      + '<table style="width:100%;font-size:9pt;border-collapse:collapse">'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Eigenverbrauch</td><td style="text-align:right;font-weight:600">' + fk(d.eigVerb) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Einspeisung</td><td style="text-align:right;font-weight:600">' + fk(d.einspm) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Stromkosten ohne PV (20&nbsp;J.)</td><td style="text-align:right;font-weight:600">' + fe(d.ohne20) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Kosten mit PV (20&nbsp;J.)</td><td style="text-align:right;font-weight:600">' + fe(d.mit20) + '</td></tr>'
+      + '<tr><td style="color:#64748b;padding:1.5mm 0">Break-even (ohne Kredit)</td><td style="text-align:right;font-weight:600">' + (d.be_plain<=30?fn(d.be_plain,0)+' Jahre':'>30 Jahre') + '</td></tr>'
+      + '<tr style="border-top:1.5px solid #f1f5f9"><td style="color:#64748b;padding:2mm 0 0;font-weight:600">Gesamtvorteil (20&nbsp;J.)</td><td style="text-align:right;font-weight:700;color:#065f46;font-size:11pt">' + fe(d.vorteil) + '</td></tr>'
+      + '</table></div>'
+      + '</div>'
+
+      + '<div style="' + sec('display:grid;grid-template-columns:3fr 2fr;gap:4mm;margin-bottom:4mm') + '">'
+
+      + '<div style="' + sec('border:1px solid #e2e8f0;border-radius:3mm;padding:4mm') + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid #f1f5f9">Ermittlung der Ersparnisse</div>'
+      + '<table style="width:100%;font-size:9pt;border-collapse:collapse">'
+      + '<thead><tr style="background:#f8fafc">'
+      + '<th style="padding:2mm 3mm;text-align:left;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">Position</th>'
+      + '<th style="padding:2mm 3mm;text-align:right;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">kWh/J.</th>'
+      + '<th style="padding:2mm 3mm;text-align:right;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">€/kWh</th>'
+      + '<th style="padding:2mm 3mm;text-align:right;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">Monatl.</th>'
+      + '<th style="padding:2mm 3mm;text-align:right;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">Jahr 1</th>'
+      + '<th style="padding:2mm 3mm;text-align:right;font-size:7.5pt;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600">20&nbsp;J.' + (d.ps>0?' *':'') + '</th>'
+      + '</tr></thead>'
+      + '<tbody>'
+      + '<tr><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9">Eigenverbrauch</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + Math.round(d.eigVerb).toLocaleString('de-DE') + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fn(d.sp,3) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEV_m) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEV_j) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEV_20j) + '</td></tr>'
+      + '<tr><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9">Einspeisung</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + Math.round(d.einspm).toLocaleString('de-DE') + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fn(d.esv,3) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEi_m) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEi_j) + '</td><td style="padding:2mm 3mm;border-bottom:1px solid #f1f5f9;text-align:right">' + fe(d.ersEi_20j) + '</td></tr>'
+      + '<tr style="background:#f0fdf4;font-weight:700"><td style="padding:2mm 3mm;color:#065f46">Gesamt</td><td style="padding:2mm 3mm;text-align:right;color:#64748b">--</td><td style="padding:2mm 3mm;text-align:right;color:#64748b">--</td><td style="padding:2mm 3mm;text-align:right;color:#065f46">' + fe(d.ersSum_m) + '</td><td style="padding:2mm 3mm;text-align:right;color:#065f46">' + fe(d.ersSum_j) + '</td><td style="padding:2mm 3mm;text-align:right;color:#065f46">' + fe(d.ersSum_20j) + '</td></tr>'
+      + '</tbody></table>'
+      + (d.ps>0?'<div style="font-size:7pt;color:#64748b;margin-top:2mm">* 20-Jahres-Summe für Eigenverbrauch inkl. ' + ps100 + '% Strompreissteigerung p.a. Einspeisevergütung konstant.</div>':'')
+      + '</div>'
+
+      + '<div style="' + sec('border:1px solid #e2e8f0;border-radius:3mm;padding:4mm;display:flex;flex-direction:column;gap:3mm') + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;padding-bottom:2mm;border-bottom:2px solid #f1f5f9">20-Jahre Vergleich' + (d.ps>0?' *':'') + '</div>'
+      + '<div><div style="font-size:7.5pt;color:#64748b;margin-bottom:1.5mm">Ohne PV</div><div style="background:#fee2e2;border-radius:2mm;padding:2mm 3mm"><span style="font-size:9.5pt;font-weight:600;color:#991b1b">' + fe(d.ohne20) + '</span></div></div>'
+      + '<div><div style="font-size:7.5pt;color:#64748b;margin-bottom:1.5mm">Mit PV (inkl. Anlage)</div><div style="background:#d1fae5;border-radius:2mm;padding:2mm 3mm;width:' + Math.min(100,Math.round(d.mit20/d.ohne20*100)) + '%"><span style="font-size:9.5pt;font-weight:600;color:#065f46">' + fe(d.mit20) + '</span></div></div>'
+      + '<div style="' + sec('background:#0d2137;color:white;border-radius:2mm;padding:3.5mm;margin-top:auto') + '"><div style="font-size:7.5pt;opacity:.7">GESAMTVORTEIL</div><div style="font-size:14pt;font-weight:700;margin:.5mm 0">' + fe(d.vorteil) + '</div><div style="font-size:7pt;opacity:.7">über 20 Jahre</div></div>'
+      + '<div style="' + sec('background:#f8fafc;border:1px solid #e2e8f0;border-radius:2mm;padding:3mm') + '"><div style="font-size:7.5pt;color:#64748b">Break-even (ohne Kredit)</div><div style="font-size:12pt;font-weight:700;color:#0d2137">' + (d.be_plain<=30?fn(d.be_plain,0)+' Jahre':'>30 Jahre') + '</div></div>'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="' + sec('border:' + (loanOn?'1px solid #e2e8f0':'2px solid #86efac') + ';border-radius:3mm;padding:4mm;' + (loanOn?'':'background:#f0fdf4')) + '">'
+      + '<div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:' + (loanOn?'#64748b':'#065f46') + ';margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid ' + (loanOn?'#f1f5f9':'#bbf7d0') + '">'
+      + (loanOn?'&#127970; Finanzierung (Darlehen)':'&#9989; Ohne Finanzierung – Kauf aus Eigenkapital')
+      + '</div>'
+      + finBlock
+      + '</div>'
+
+      + '<div style="page-break-before:always">'
+      + '<div style="' + sec('background:#0d2137;color:white;padding:4mm 8mm;border-radius:3mm;margin-bottom:4mm;display:flex;justify-content:space-between;align-items:center') + '"><div style="font-size:12pt;font-weight:700">&#9728; PV Wirtschaftlichkeitsrechner – Jahresübersicht</div><div style="font-size:8.5pt;opacity:.7">Erstellt am ' + date + '</div></div>'
+      + '<div style="' + sec('background:#dbeafe;border:1px solid #93c5fd;border-radius:3mm;padding:2.5mm 5mm;margin-bottom:4mm;font-size:8.5pt;color:#1e3a8a') + '"><b>Hinweis:</b> ' + hintKum + ' Grün&nbsp;= Break-even erreicht.' + psNote + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
+      + '<thead><tr style="background:#0d2137;color:white">'
+      + '<th style="padding:2.5mm 3mm;text-align:left;font-size:7.5pt">Jahr</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Eigenverbrauch</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Einspeisung</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Gesamtersparnis</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Kreditrate (Jahr)</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Netto Cashflow</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Kumuliert</th>'
+      + '</tr></thead>'
+      + '<tbody>' + yearRows + '</tbody>'
+      + '</table>'
+      + '</div>'
+      + '</div>';
+  }
+  /* init */
+  rangeUpd();
+  recalc();
+</script>
+</body>
+</html>
