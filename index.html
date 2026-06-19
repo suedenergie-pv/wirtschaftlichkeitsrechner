@@ -956,7 +956,7 @@
     const tbody = document.getElementById('yr-tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const startKap = -ak;
+    const startKap = loanOn ? -ek : -ak;
     let kum = startKap, beFound = false;
     for (let y = 1; y <= 20; y++) {
       const spY       = sp * Math.pow(1+ps, y-1);
@@ -1023,7 +1023,7 @@
     const ps100 = (d.ps*100).toFixed(1);
 
     /* yearly rows with growing prices */
-    const startKap = -d.ak;
+    const startKap = loanOn ? -d.ek : -d.ak;
     let kum = startKap, beFound = false, yearRows = '';
     for (let y = 1; y <= 20; y++) {
       const spY     = d.sp * Math.pow(1 + d.ps, y - 1);
@@ -1276,6 +1276,7 @@
 </script>
 </body>
 </html>
+
 
 
 
