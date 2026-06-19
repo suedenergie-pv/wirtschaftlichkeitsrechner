@@ -992,8 +992,9 @@
       <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;background:white;
-             -webkit-print-color-adjust:exact;print-color-adjust:exact}
-        @page{size:A4 portrait;margin:12mm 14mm}
+             -webkit-print-color-adjust:exact;print-color-adjust:exact;
+             padding:10mm 14mm}
+        @page{size:A4 portrait;margin:0}
       </style>
     </head><body>${buildPDF()}</body></html>`);
     w.document.close();
@@ -1147,7 +1148,7 @@
     return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#0f172a">'
       + titlePage
 
-      + '<div style="' + sec('background:#1e1e1e;color:white;padding:6mm 8mm;border-radius:4mm;margin-bottom:5mm;display:flex;justify-content:space-between;align-items:center') + '">'
+      + '<div style="' + sec('background:#1e1e1e;color:white;padding:6mm 8mm;border-radius:4mm;margin-bottom:5mm;margin-top:10mm;display:flex;justify-content:space-between;align-items:center') + '">'
       + '<div><div style="font-size:15pt;font-weight:700">PV Wirtschaftlichkeitsrechner</div>'
       + '<div style="font-size:8.5pt;opacity:.7;margin-top:1.5mm">Wirtschaftlichkeitsanalyse Photovoltaikanlage</div></div>'
       + '<div style="display:flex;align-items:center;gap:5mm">'
@@ -1230,7 +1231,7 @@
       + finBlock
       + '</div>'
 
-      + '<div style="page-break-before:always">'
+      + '<div style="page-break-before:always;padding-top:10mm">'
       + '<div style="' + sec('background:#1e1e1e;color:white;padding:4mm 8mm;border-radius:3mm;margin-bottom:4mm;display:flex;justify-content:space-between;align-items:center') + '"><div style="font-size:12pt;font-weight:700">PV Wirtschaftlichkeitsrechner – Jahresübersicht</div><div style="display:flex;align-items:center;gap:4mm"><div style="font-size:8.5pt;opacity:.7">Erstellt am ' + date + '</div><img src="' + WHITE_LOGO + '" style="height:18px;display:block"></div></div>'
       + '<div style="' + sec('background:#dbeafe;border:1px solid #93c5fd;border-radius:3mm;padding:2.5mm 5mm;margin-bottom:4mm;font-size:8.5pt;color:#1e3a8a') + '"><b>Hinweis:</b> ' + hintKum + ' Grün&nbsp;= Break-even erreicht.' + psNote + '</div>'
       + '<table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
@@ -1262,6 +1263,7 @@
 </script>
 </body>
 </html>
+
 
 
 
