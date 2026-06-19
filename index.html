@@ -1246,15 +1246,8 @@
       + '<span style="display:flex;align-items:center;gap:2mm"><span style="display:inline-block;width:12mm;height:4mm;background:#d1fae5;border:1px solid #6ee7b7;border-radius:1mm"></span><span style="font-size:8pt">Break-even erreicht</span></span>'
       + (loanOn ? '<span style="display:flex;align-items:center;gap:2mm"><span style="display:inline-block;width:12mm;height:4mm;background:#fff7ed;border:1px solid #fdba74;border-radius:1mm"></span><span style="font-size:8pt">Kreditlaufzeit (' + d.lz + ' J.)</span></span>' : '')
       + (d.ps > 0 ? '<span style="font-size:8pt;color:#64748b;margin-left:2mm">&nbsp;· Strompreissteigerung ' + ps100 + '&nbsp;% p.a.</span>' : '')
-      + '<div style="font-size:7.5pt;color:#94a3b8;margin-top:2mm;width:100%;line-height:1.5">'
-      + (loanOn && d.ek === 0
-          ? 'Nettobilanz startet bei <b>0&amp;nbsp;&amp;euro;</b> &amp;ndash; Vollfinanzierung, kein Eigenkapital eingesetzt. Break-even: kumulierte Ersparnisse decken alle Kreditkosten.'
-          : loanOn
-          ? 'Nettobilanz startet bei <b>&amp;minus;' + fe(d.ek) + '</b> &amp;ndash; Ihr Eigenkapitaleinsatz. Break-even: EK vollst&amp;auml;ndig zur&amp;uuml;ckgewonnen.'
-          : 'Nettobilanz startet bei <b>&amp;minus;' + fe(d.ak) + '</b> &amp;ndash; Volle Investitionssumme. Break-even: Anlage vollst&amp;auml;ndig amortisiert.')
       + '</div>'
-      + '</div>'
-      + '<table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
+      + '<div style="border-radius:3mm;overflow:hidden;border:1px solid #e2e8f0"><table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
       + '<thead><tr style="background:#1e1e1e;color:white">'
       + '<th style="padding:2.5mm 3mm;text-align:left;font-size:7.5pt">Jahr</th>'
       + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Eigenverbrauch</th>'
@@ -1265,7 +1258,7 @@
       + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Nettobilanz</th>'
       + '</tr></thead>'
       + '<tbody>' + yearRows + '</tbody>'
-      + '</table>'
+      + '</table></div>'
       + '<div style="margin-top:6mm;background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #f97316;border-radius:3mm;padding:4mm;font-size:7pt;color:#78350f;line-height:1.7">'
       + '<div style="font-weight:700;color:#7c2d12;margin-bottom:1.5mm;font-size:7.5pt;text-transform:uppercase;letter-spacing:.05em">&#9888; Haftungsausschluss</div>'
       + 'Diese Wirtschaftlichkeitsanalyse wurde auf Basis der eingegebenen Parameter erstellt und dient ausschlie&szlig;lich der unverbindlichen Erstinformation. Alle Berechnungen, Prognosen und Angaben sind indikative Richtwerte ohne Gew&auml;hr. Tats&auml;chliche Ergebnisse k&ouml;nnen aufgrund individueller Gegebenheiten, &Auml;nderungen bei Strompreisen, Einspeiseverg&uuml;tungen sowie technischer und wirtschaftlicher Rahmenbedingungen erheblich von den dargestellten Werten abweichen. Die <b>SüdEnergie Photovoltaik GmbH</b> &uuml;bernimmt keine Haftung f&uuml;r die Richtigkeit, Vollst&auml;ndigkeit oder Aktualit&auml;t dieser Analyse. Diese Analyse stellt kein verbindliches Angebot dar und ersetzt keine individuelle Fach-, Steuer- oder Rechtsberatung.'
