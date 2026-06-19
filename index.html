@@ -986,8 +986,12 @@
 
   /* ══════════════════════════════════════════ PDF EXPORT */
   function exportPDF() {
-    const w = window.open('', '_blank');
-    w.document.write(`<!DOCTYPE html><html><head>
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;border:0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head>
       <meta charset="UTF-8"><title></title>
       <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -997,8 +1001,12 @@
         @page{size:A4 portrait;margin:0}
       </style>
     </head><body>${buildPDF()}</body></html>`);
-    w.document.close();
-    setTimeout(() => { w.focus(); w.print(); }, 400);
+    doc.close();
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 400);
   }
 
   function buildPDF() {
