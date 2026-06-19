@@ -724,7 +724,7 @@
           <th>Gesamtersparnis</th>
           <th>Kreditrate (Jahr)</th>
           <th>Netto Cashflow</th>
-          <th>Kumuliert</th>
+          <th title="Netto-Cashflow aufaddiert. Start: bei Kredit = eingesetztes Eigenkapital (negativ), bei Eigenkauf = volle Investition. Positiv = Break-even überschritten.">Nettobilanz ⓘ</th>
         </tr>
       </thead>
       <tbody id="yr-tbody"></tbody>
@@ -1246,6 +1246,13 @@
       + '<span style="display:flex;align-items:center;gap:2mm"><span style="display:inline-block;width:12mm;height:4mm;background:#d1fae5;border:1px solid #6ee7b7;border-radius:1mm"></span><span style="font-size:8pt">Break-even erreicht</span></span>'
       + (loanOn ? '<span style="display:flex;align-items:center;gap:2mm"><span style="display:inline-block;width:12mm;height:4mm;background:#fff7ed;border:1px solid #fdba74;border-radius:1mm"></span><span style="font-size:8pt">Kreditlaufzeit (' + d.lz + ' J.)</span></span>' : '')
       + (d.ps > 0 ? '<span style="font-size:8pt;color:#64748b;margin-left:2mm">&nbsp;· Strompreissteigerung ' + ps100 + '&nbsp;% p.a.</span>' : '')
+      + '<div style="font-size:7.5pt;color:#94a3b8;margin-top:2mm;width:100%;line-height:1.5">'
+      + (loanOn && d.ek === 0
+          ? 'Nettobilanz startet bei <b>0&amp;nbsp;&amp;euro;</b> &amp;ndash; Vollfinanzierung, kein Eigenkapital eingesetzt. Break-even: kumulierte Ersparnisse decken alle Kreditkosten.'
+          : loanOn
+          ? 'Nettobilanz startet bei <b>&amp;minus;' + fe(d.ek) + '</b> &amp;ndash; Ihr Eigenkapitaleinsatz. Break-even: EK vollst&amp;auml;ndig zur&amp;uuml;ckgewonnen.'
+          : 'Nettobilanz startet bei <b>&amp;minus;' + fe(d.ak) + '</b> &amp;ndash; Volle Investitionssumme. Break-even: Anlage vollst&amp;auml;ndig amortisiert.')
+      + '</div>'
       + '</div>'
       + '<table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
       + '<thead><tr style="background:#1e1e1e;color:white">'
@@ -1255,7 +1262,7 @@
       + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Gesamtersparnis</th>'
       + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Kreditrate (Jahr)</th>'
       + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Netto Cashflow</th>'
-      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Kumuliert</th>'
+      + '<th style="padding:2.5mm 3mm;text-align:right;font-size:7.5pt">Nettobilanz</th>'
       + '</tr></thead>'
       + '<tbody>' + yearRows + '</tbody>'
       + '</table>'
@@ -1276,6 +1283,9 @@
 </script>
 </body>
 </html>
+
+
+
 
 
 
