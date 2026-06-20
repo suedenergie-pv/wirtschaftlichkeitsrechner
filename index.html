@@ -32,10 +32,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;ba
 }
 
 /* ── HERO ─────────────────────────────────────── */
-.hero{background:white;border-bottom:1px solid var(--border)}
-.hero-inner{display:flex;align-items:stretch;min-height:200px}
-.hero-left{flex:1;padding:2rem 2.5rem;display:flex;flex-direction:column;justify-content:center;gap:.875rem}
-.hero-logo{height:40px;display:block}
+.hero{background:linear-gradient(to right,white 58%,#fde8dd 100%);border-bottom:1px solid var(--border)}
+.hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:stretch;min-height:200px}
+.hero-left{flex:1;padding:2rem 1.5rem;display:flex;flex-direction:column;justify-content:center;gap:.875rem;align-items:flex-start}
+.hero-logo{height:44px;width:auto;max-width:280px;display:block;object-fit:contain}
 .hero-title{font-size:1.875rem;font-weight:700;color:var(--text);line-height:1.2}
 .hero-sub{font-size:.92rem;color:var(--muted);letter-spacing:.005em}
 .hero-right{width:360px;flex-shrink:0;background:linear-gradient(135deg,#fff7f4 0%,#fde8dd 40%,#fbd4c2 100%);position:relative;overflow:hidden}
@@ -226,7 +226,7 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
 .pos{color:var(--green-d)!important;font-weight:600!important}
 .neg{color:var(--red)!important;font-weight:600!important}
 .be-row td{background:rgba(16,185,129,.09)!important;border-bottom:1px solid rgba(16,185,129,.15)!important}
-.loan-row td{background:rgba(59,130,246,.04)!important}
+.loan-row td{background:rgba(239,68,68,.07)!important;border-bottom:1px solid rgba(239,68,68,.1)!important}
 
 /* ── SAVINGS HEIGHT FIX ───────────────────────── */
 .savings-wrap{align-items:stretch}
@@ -235,10 +235,19 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
 .bar-val{font-size:.82rem;font-weight:700;color:var(--text);width:110px;text-align:right;flex-shrink:0;white-space:nowrap}
 
 /* ── SECTION HIGHLIGHTS ───────────────────────── */
-.sec-eingaben .card{border-top:3px solid var(--orange);background:#fffcf9}
-.sec-fin .card{border-top:3px solid var(--purple);background:#fdfaff}
+.sec-eingaben .card{border:1px solid var(--orange-m);border-top:4px solid var(--orange);background:linear-gradient(180deg,#fff4ee 0%,#fffdf9 50%,white 100%)}
 .sec-eingaben .sec-head .sec-ico{background:var(--orange);color:white}
+
+.sec-fin .card{border:1px solid #d8b4fe;border-top:4px solid var(--purple);background:linear-gradient(180deg,#f5f0ff 0%,#faf7ff 50%,white 100%)}
 .sec-fin .sec-head .sec-ico{background:var(--purple);color:white}
+.sec-fin .lc{background:linear-gradient(135deg,#ede9fe,#f5f0ff);border-color:#c4b5fd}
+.sec-fin .lc-label{color:#7c3aed;opacity:1}
+.sec-fin .lc-value{color:#6d28d9}
+.sec-fin .cf-card{background:linear-gradient(135deg,#ede9fe,#f5f0ff);border-color:#c4b5fd}
+.sec-fin .cf-label{color:#7c3aed}
+.sec-fin .cs-mini{background:linear-gradient(135deg,#ede9fe,#f5f0ff);border-color:#c4b5fd}
+.sec-fin .cs-label{color:#7c3aed}
+.sec-fin .loan-info{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
 
 /* ── FIXED PDF FAB ────────────────────────────── */
 .pdf-fab{position:fixed;bottom:1.75rem;right:1.75rem;z-index:1000;background:var(--orange);color:white;border:none;border-radius:50px;padding:.75rem 1.4rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(232,96,58,.4);display:flex;align-items:center;gap:.45rem;transition:background .15s,transform .1s,box-shadow .15s}
