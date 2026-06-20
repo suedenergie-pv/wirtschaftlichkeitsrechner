@@ -8,55 +8,64 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --primary:       #111111;
-      --primary-mid:   #1c1c1c;
-      --primary-light: #2e2e2e;
-      --solar:         #c8604f;
-      --solar-light:   #fbeae7;
+      --primary:       #1e293b;
+      --primary-mid:   #334155;
+      --primary-light: #475569;
+      --solar:         #d9602e;
+      --solar-light:   #fff4ee;
       --green:         #10b981;
       --green-light:   #d1fae5;
       --red:           #ef4444;
       --red-light:     #fee2e2;
       --purple:        #8b5cf6;
       --purple-light:  #ede9fe;
-      --bg:            #f1f5f9;
+      --bg:            #f0f2f5;
       --card:          #ffffff;
       --text:          #0f172a;
       --muted:         #64748b;
       --border:        #e2e8f0;
       --radius:        12px;
-      --shadow:        0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06);
-      --shadow-lg:     0 8px 24px rgba(0,0,0,.12);
+      --shadow:        0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.05);
+      --shadow-lg:     0 8px 24px rgba(0,0,0,.10);
     }
 
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
 
     /* ── HEADER ──────────────────────────────── */
     .site-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      color: white;
-      padding: 2rem 2rem 0;
+      background: white;
+      color: var(--text);
+      padding: 1.5rem 2rem 0;
+      border-bottom: 1px solid var(--border);
     }
-    .header-top { display: flex; align-items: center; gap: 1rem; max-width: 1240px; margin: 0 auto; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 1240px; margin: 0 auto; }
     .header-icon { font-size: 2.8rem; line-height: 1; }
-    .header-top h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
-    .header-top p  { opacity: .75; font-size: .9rem; margin-top: .15rem; }
+    .header-top h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
+    .header-top p  { font-size: .9rem; margin-top: .2rem; color: var(--muted); }
+    .header-accent-bar { width: 3px; height: 2.8rem; background: var(--solar); border-radius: 3px; flex-shrink: 0; }
 
     /* KPI bar */
     .kpi-strip {
       max-width: 1240px; margin: 1.5rem auto 0;
       display: grid; grid-template-columns: repeat(4, 1fr);
-      background: rgba(255,255,255,.07);
+      background: white;
       border-radius: var(--radius) var(--radius) 0 0;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,.12); border-bottom: none;
+      border: 1px solid var(--border); border-bottom: none;
+      box-shadow: 0 -1px 4px rgba(0,0,0,.04);
     }
-    .kpi-item { padding: 1rem 1.25rem; border-right: 1px solid rgba(255,255,255,.1); }
+    .kpi-item { padding: 1rem 1.25rem; border-right: 1px solid var(--border); }
     .kpi-item:last-child { border-right: none; }
-    .kpi-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; opacity: .65; }
-    .kpi-value { font-size: 1.6rem; font-weight: 700; margin: .15rem 0; }
-    .kpi-sub   { font-size: .75rem; opacity: .6; }
-    .kpi-item.accent { background: rgba(200,96,79,.12); }
+    .kpi-badge { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: .5rem; }
+    .kpi-badge-blue   { background: #dbeafe; }
+    .kpi-badge-green  { background: var(--green-light); }
+    .kpi-badge-orange { background: var(--solar-light); }
+    .kpi-badge-purple { background: var(--purple-light); }
+    .kpi-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; margin: .15rem 0; color: var(--text); }
+    .kpi-sub   { font-size: .72rem; color: var(--muted); }
+    .kpi-item.accent { background: var(--solar-light); }
+    .kpi-item.accent .kpi-value { color: var(--solar); }
 
     /* ── LAYOUT ──────────────────────────────── */
     .container { max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.5rem; }
@@ -92,10 +101,11 @@
       border-bottom: 1.5px solid var(--border);
     }
     .card-title-icon {
-      width: 30px; height: 30px; border-radius: 7px;
-      display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
-    .bg-yellow { background: #fee2d9; }
+    .bg-yellow { background: var(--solar-light); }
     .bg-blue   { background: #dbeafe; }
     .bg-green  { background: var(--green-light); }
     .bg-purple { background: var(--purple-light); }
@@ -325,6 +335,7 @@
 </div>
 <header class="site-header">
   <div class="header-top">
+    <div class="header-accent-bar"></div>
     <div>
       <h1>PV Wirtschaftlichkeitsrechner</h1>
       <p>Photovoltaikanlage · Ersparnisse · Finanzierung</p>
@@ -332,21 +343,25 @@
   </div>
   <div class="kpi-strip">
     <div class="kpi-item">
+      <div class="kpi-badge kpi-badge-blue">📊</div>
       <div class="kpi-label">Ø Alte Stromkosten / Monat</div>
       <div class="kpi-value" id="kpi-alt">—</div>
       <div class="kpi-sub" id="kpi-alt-sub">Ø über 20 Jahre</div>
     </div>
     <div class="kpi-item">
+      <div class="kpi-badge kpi-badge-green">⚡</div>
       <div class="kpi-label">Neue Kosten gesamt</div>
       <div class="kpi-value" id="kpi-neu">—</div>
       <div class="kpi-sub">während Kreditlaufzeit / Monat</div>
     </div>
     <div class="kpi-item accent">
+      <div class="kpi-badge kpi-badge-orange">💰</div>
       <div class="kpi-label">Ø Netto-Ersparnis / Monat (20 J.)</div>
       <div class="kpi-value" id="kpi-ersparnis">—</div>
       <div class="kpi-sub" id="kpi-ersparnis-sub">inkl. Kredit &amp; Preissteigerung</div>
     </div>
     <div class="kpi-item">
+      <div class="kpi-badge kpi-badge-purple">📅</div>
       <div class="kpi-label">Amortisation</div>
       <div class="kpi-value" id="kpi-amort">—</div>
       <div class="kpi-sub">Jahre (ohne Kredit)</div>
