@@ -221,6 +221,29 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
 .export-btn:active{transform:scale(.98)}
 .footer-bar{max-width:1200px;margin:0 auto;padding:.75rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.75rem;font-size:.71rem;color:var(--muted2)}
 .footer-bar img{height:18px;opacity:.35}
+
+/* ── YEAR TABLE COLORS ────────────────────────── */
+.pos{color:var(--green-d)!important;font-weight:600!important}
+.neg{color:var(--red)!important;font-weight:600!important}
+.be-row td{background:rgba(16,185,129,.09)!important;border-bottom:1px solid rgba(16,185,129,.15)!important}
+.loan-row td{background:rgba(59,130,246,.04)!important}
+
+/* ── SAVINGS HEIGHT FIX ───────────────────────── */
+.savings-wrap{align-items:stretch}
+
+/* ── BAR WITH VALUE ───────────────────────────── */
+.bar-val{font-size:.82rem;font-weight:700;color:var(--text);width:110px;text-align:right;flex-shrink:0;white-space:nowrap}
+
+/* ── SECTION HIGHLIGHTS ───────────────────────── */
+.sec-eingaben .card{border-top:3px solid var(--orange);background:#fffcf9}
+.sec-fin .card{border-top:3px solid var(--purple);background:#fdfaff}
+.sec-eingaben .sec-head .sec-ico{background:var(--orange);color:white}
+.sec-fin .sec-head .sec-ico{background:var(--purple);color:white}
+
+/* ── FIXED PDF FAB ────────────────────────────── */
+.pdf-fab{position:fixed;bottom:1.75rem;right:1.75rem;z-index:1000;background:var(--orange);color:white;border:none;border-radius:50px;padding:.75rem 1.4rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(232,96,58,.4);display:flex;align-items:center;gap:.45rem;transition:background .15s,transform .1s,box-shadow .15s}
+.pdf-fab:hover{background:var(--orange-d);transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,96,58,.5)}
+.pdf-fab:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -363,7 +386,7 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
   </section>
 
   <!-- EINGABEN -->
-  <section class="sec">
+  <section class="sec sec-eingaben">
     <h2 class="sec-head">
       <span class="sec-ico sec-ico--orange">⚙</span>
       Eingaben
@@ -394,7 +417,7 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
           <div class="fld">
             <span class="fld-label">Preissteigerung / Jahr</span>
             <div class="inp-wrap">
-              <input type="number" id="preissteigerung" value="3.0" min="0" step="0.1" oninput="recalc()">
+              <input type="number" id="preissteigerung" value="4.0" min="0" step="0.1" oninput="recalc()">
               <span class="inp-unit">%</span>
             </div>
           </div>
@@ -416,14 +439,14 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
           <div class="fld">
             <span class="fld-label">Modulanzahl</span>
             <div class="inp-wrap">
-              <input type="number" id="modulanzahl" value="12" min="1" step="1" oninput="recalc()">
+              <input type="number" id="modulanzahl" value="22" min="1" step="1" oninput="recalc()">
               <span class="inp-unit">Stück</span>
             </div>
           </div>
           <div class="fld">
             <span class="fld-label">Modulleistung</span>
             <div class="inp-wrap">
-              <input type="number" id="modulleistung" value="400" min="0" step="10" oninput="recalc()">
+              <input type="number" id="modulleistung" value="460" min="0" step="10" oninput="recalc()">
               <span class="inp-unit">Wp</span>
             </div>
           </div>
@@ -437,7 +460,7 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
           <div class="fld">
             <span class="fld-label">Einspeisevergütung</span>
             <div class="inp-wrap">
-              <input type="number" id="einspeisung" value="0.082" min="0" step="0.001" oninput="recalc()">
+              <input type="number" id="einspeisung" value="0.078" min="0" step="0.001" oninput="recalc()">
               <span class="inp-unit">€/kWh</span>
             </div>
           </div>
@@ -449,8 +472,8 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
             </div>
           </div>
           <div class="fld fld-slider">
-            <span class="fld-label">Eigennutzungsquote: <strong id="range-val">30</strong> %</span>
-            <input type="range" id="eigennutzung" min="10" max="90" value="30" class="slider" oninput="recalc()">
+            <span class="fld-label">Eigennutzungsquote: <strong id="range-val">75</strong> %</span>
+            <input type="range" id="eigennutzung" min="10" max="90" value="75" class="slider" oninput="document.getElementById('range-val').textContent=this.value;recalc()">
           </div>
         </div>
       </div>
@@ -570,51 +593,34 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
       Wirtschaftlichkeit über 20 Jahre
     </h2>
     <div class="card">
-      <div class="comp-summary">
-        <div class="csi">
-          <div class="csi-lbl">Stromkosten ohne PV (20 J.)</div>
-          <div class="csi-val" id="comp-ohne">—</div>
-        </div>
-        <div class="csi">
-          <div class="csi-lbl">Gesamtkosten mit PV (20 J.)</div>
-          <div class="csi-val" id="comp-mit">—</div>
-        </div>
-        <div class="csi accent">
-          <div class="csi-lbl">Vorteil durch PV (20 J.)</div>
-          <div class="csi-val" id="comp-vorteil">—</div>
-        </div>
-      </div>
-
       <div class="bar-section">
         <div class="bar-row">
           <div class="bar-lbl">Stromkosten ohne PV (20 J.)</div>
           <div class="bar-track"><div class="bar-fill bar-fill--red" id="bar-ohne" style="width:100%"></div></div>
+          <div class="bar-val" id="comp-ohne">—</div>
         </div>
         <div class="bar-row">
           <div class="bar-lbl">Gesamtkosten mit PV (20 J.)</div>
           <div class="bar-track"><div class="bar-fill bar-fill--green" id="bar-mit" style="width:70%"></div></div>
+          <div class="bar-val" id="comp-mit">—</div>
         </div>
         <div class="bar-row">
-          <div class="bar-lbl">Vorteil durch PV</div>
+          <div class="bar-lbl">Vorteil durch PV (20 J.)</div>
           <div class="bar-track"><div class="bar-fill bar-fill--orange" id="bar-vorteil" style="width:30%"></div></div>
+          <div class="bar-val" id="comp-vorteil" style="color:var(--green-d)">—</div>
         </div>
       </div>
-
-      <div class="be-section">
-        <div class="be-title">Break-even Analyse</div>
-        <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:.5rem">
-          <div style="font-size:.82rem;color:var(--text2)">Break-even: <strong id="be-year">—</strong> Jahre</div>
-          <div style="font-size:.82rem;color:var(--text2)">Gesamtvorteil: <strong id="gesamtvorteil">—</strong></div>
-          <div id="roi-badge"></div>
-        </div>
-        <div class="prog-labels"><span>0 J.</span><span id="be-prog-label" style="font-weight:600;color:var(--text)">—</span><span>20 J.</span></div>
-        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <!-- hidden JS-required elements -->
+      <div style="display:none">
+        <div id="prog-fill" style="width:0%"></div>
+        <div id="be-year"></div><div id="gesamtvorteil"></div>
+        <div id="roi-badge"></div><div id="be-prog-label"></div>
       </div>
     </div>
   </section>
 
   <!-- MIT FINANZIERUNG -->
-  <section class="sec">
+  <section class="sec sec-fin">
     <h2 class="sec-head">
       <span class="sec-ico sec-ico--purple">🏦</span>
       Mit Finanzierung (Darlehen)
@@ -1292,6 +1298,8 @@ input[type="text"]:focus{outline:none;border-color:var(--orange);box-shadow:0 0 
   recalc();
 </script>
 <script>(function(){var obs=new MutationObserver(function(){var s=document.getElementById('kpi-ersparnis');var d=document.getElementById('sav-hl-val');if(s&&d)d.textContent=s.textContent;});window.addEventListener('load',function(){var s=document.getElementById('kpi-ersparnis');if(s){obs.observe(s,{childList:true,characterData:true,subtree:true});var d=document.getElementById('sav-hl-val');if(d)d.textContent=s.textContent;}});})();</script>
+
+<button class="pdf-fab" onclick="exportPDF()">📄 PDF exportieren</button>
 
 </body>
 </html>
