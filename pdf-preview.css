@@ -2773,6 +2773,16 @@ p {
   width:17px;
   height:17px;
 }
+.page-3 .compare-total.negative strong {
+  color:var(--red);
+}
+.page-3 .compare-total.negative .trend {
+  border-color:var(--red);
+  color:var(--red);
+}
+.page-3 .compare-total.negative .trend svg {
+  transform:scaleY(-1);
+}
 .page-3 .info-box {
   position:absolute;
   left:71px;
@@ -3204,6 +3214,11 @@ p {
 }
 .page-4 .year-table td.bold {
   font-weight:760;
+}
+.page-4 .year-table tr.neg {
+  background:#fff7ef !important;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
 }
 .page-4 .year-table tr.neg .cash, .page-4 .year-table tr.neg .balance, .page-4 .year-table tr.mixed .balance {
   color:var(--red);

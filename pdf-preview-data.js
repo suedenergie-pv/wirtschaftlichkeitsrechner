@@ -46,7 +46,7 @@
 
     /* 20-year table rows (0-indexed, all 20 rows) */
     tableRows20 = [];
-    var startKap = loanOn ? -(d.ek + d.zinsenGes) : -d.ak;
+    var startKap = -d.ak;  // immer volle Investition (wie be_plain in index.html)
     var kum = startKap, beFound = false, beYear = -1;
     for (var y = 1; y <= 20; y++) {
       var spY = d.sp * Math.pow(1 + d.ps, y - 1);
@@ -55,7 +55,7 @@
       var ersY = ersEV_y + ersEi_y;
       var rJ = (loanOn && y <= d.lz) ? d.rate * 12 : 0;
       var nJ = ersY - rJ;
-      kum += nJ;
+      kum += ersY;
       if (!beFound && kum >= 0) { beFound = true; beYear = y; }
       tableRows20.push({
         year: y,
@@ -91,7 +91,12 @@
       selfUseRate:      Math.round(d.enq * 100) + ' %',
       feedInTariff:     fn(d.esv, 3) + ' €/kWh',
       oldMonthlyAvg:    fe(d.avgAlteMk),
-      newMonthly:       fe(d.neueMk),
+      oldMonthlyJahr1:  'aktuell: ' + fe(d.alteMk) + ' / Mon.',
+      newMonthly:       fe(d.neuGesamt),
+      newMonthlyJahr:   loanOn ? 'davon Kreditrate: ' + fe(d.rate) + ' / Mon.' : (d.neueJk <= 0 ? 'Nettoeinnahme: ' + fe(-d.neueJk) + ' / Jahr' : fe(d.neueJk) + ' / Jahr'),
+      orangeNetSub:     d.ps > 0 ? 'Ø über 20 Jahre inkl. ' + ps100 + ' % Preissteigerung' : 'Ø über 20 Jahre',
+      breakEvenLabel:   loanOn ? 'Break-even (inkl. Kredit)' : 'Break-even',
+      creditLegend:     'Kreditlaufzeit (' + d.lz + ' J.)',
       selfConsumption:  fk(d.eigVerb),
       feedIn:           fk(d.einspm),
       costWithoutPv20y: fe(d.ohne20),
@@ -160,12 +165,18 @@
       ],
     };
 
-    /* hide page 3 when no loan */
-    if (!loanOn) {
+    /* hide page 3 when no loan, loan amount is zero (ek >= ak), or term is zero */
+    if (!loanOn || d.darlehn === 0 || d.lz === 0) {
       var p3 = document.querySelector('.page.page-3');
       if (p3) p3.style.display = 'none';
       var loanLegendBox = document.querySelector('.page-4 .legend-item .legend-box.orange');
       if (loanLegendBox) loanLegendBox.closest('.legend-item').style.display = 'none';
+    }
+
+    /* negative Unterschied → rote Farbe + Pfeil runter */
+    if (d.cmpDiff < 0) {
+      var ct = document.querySelector('.page-3 .compare-total');
+      if (ct) ct.classList.add('negative');
     }
 
     /* update "Kreditlaufzeit (X J.)" in page 4 legend */
@@ -199,12 +210,17 @@
       selfUseRate:      '75 %',
       feedInTariff:     '0,078 €/kWh',
       oldMonthlyAvg:    '158,82 €',
-      newMonthly:       '-16,32 €',
+      oldMonthlyJahr1:  'aktuell: 106,67 € / Mon.',
+      newMonthly:       '135,54 €',
+      newMonthlyJahr:   'davon Kreditrate: 151,87 € / Mon.',
+      orangeNetSub:     'Ø über 20 Jahre inkl. 4,0 % Preissteigerung',
+      breakEvenLabel:   'Break-even (inkl. Kredit)',
+      creditLegend:     'Kreditlaufzeit (10 J.)',
       selfConsumption:  '3.000 kWh',
       feedIn:           '6.614 kWh',
       costWithoutPv20y: '38.115,94 €',
       costWithPv20y:    '14.211,15 €',
-      breakEven:        '10 Jahre',
+      breakEven:        '11 Jahre',
       totalBenefit:     '23.904,80 €',
       loanAmount:       '15.000,00 €',
       interestRate:     '4,0 %',
@@ -305,10 +321,10 @@
         if (!tr) return;
 
         tr.className = '';
-        if (row.isBreakEven)      tr.classList.add('break');
-        else if (row.isLoan)      tr.classList.add('neg');
-        else if (row.netVal >= 0) tr.classList.add('pos');
-        else                      tr.classList.add('mixed');
+        if (row.isBreakEven)       tr.classList.add('break');
+        else if (row.isLoan)       tr.classList.add('neg');
+        else if (row.kumVal >= 0)  tr.classList.add('pos');
+        else                       tr.classList.add('mixed');
 
         var yearTd = tr.querySelector('.year') || tr.querySelector('td:first-child');
         if (yearTd) yearTd.textContent = row.isBreakEven ? row.year + ' ✓ Break-even' : String(row.year);
@@ -333,7 +349,10 @@
   ══════════════════════════════════════════════════════════════════════════ */
   if (new URLSearchParams(window.location.search).get('print') === '1') {
     window.addEventListener('load', function () {
-      setTimeout(function () { window.print(); }, 1200);
+      setTimeout(function () {
+        window.print();
+        window.addEventListener('afterprint', function () { window.close(); });
+      }, 1200);
     });
   }
 
