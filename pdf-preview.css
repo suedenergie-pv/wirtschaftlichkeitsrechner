@@ -1633,8 +1633,54 @@ p {
   font-size: 13px;
   font-weight: 650;
 }
+.page-2 .growth-strip {
+  margin-top: 16px;
+  border: 1px solid #fcd9c6;
+  background: linear-gradient(135deg, #fff 0%, #fff4ee 100%);
+  border-radius: 9px;
+  padding: 11px 14px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.page-2 .growth-strip .gs-head {
+  font-size: 11px;
+  font-weight: 740;
+  color: #c94e2a;
+  text-align: center;
+  margin-bottom: 9px;
+}
+.page-2 .growth-strip .gs-body {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.page-2 .growth-strip .gs-col { text-align: center; }
+.page-2 .growth-strip .gs-lbl {
+  font-size: 10px;
+  color: #8a93a3;
+  margin-bottom: 3px;
+}
+.page-2 .growth-strip .gs-val {
+  font-size: 22px;
+  font-weight: 780;
+  color: #1f2733;
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+.page-2 .growth-strip .gs-arrow {
+  font-size: 20px;
+  font-weight: 740;
+  color: #e8603a;
+  padding: 0 10px;
+}
+.page-2 .growth-strip .gs-foot {
+  font-size: 9.5px;
+  color: #7a8497;
+  text-align: center;
+  margin-top: 8px;
+}
 .page-2 .result-list {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 .page-2 .result-row {
   height: 34px;

@@ -41,7 +41,7 @@
     ────────────────────────────────────────────────────────────────────────── */
     var d = C;
     var loanOn = !!d.loanOn;
-    var ps100 = (d.ps * 100).toFixed(1);
+    var ps100 = (d.ps * 100).toFixed(1).replace('.', ',');
     var kName = ((customer.vorname || '') + ' ' + (customer.nachname || '')).trim() || '–';
 
     /* 20-year table rows (0-indexed, all 20 rows) */
@@ -95,6 +95,9 @@
       newMonthly:       fe(loanOn ? d.neuGesamt : d.neueMk),
       newMonthlyJahr:   loanOn ? 'inkl. Kreditrate ' + fe(d.rate) + ' / Mon.' : 'reine Stromkosten mit PV',
       orangeNetSub:     loanOn ? 'Ersparnis − Kreditrate / Monat' : 'monatlich verfügbar',
+      growToday:        fe(d.ersM_J1),
+      growY20:          fe(d.ersM_J20),
+      growFoot:         d.ps > 0 ? 'bei ' + ps100 + ' % Strompreissteigerung p.a. · Brutto-Stromersparnis' : 'ohne Strompreissteigerung · Brutto-Stromersparnis',
       breakEvenLabel:   loanOn ? 'Break-even (inkl. Kredit)' : 'Break-even',
       creditLegend:     'Kreditlaufzeit (' + d.lz + ' J.)',
       selfConsumption:  fk(d.eigVerb),
@@ -213,7 +216,10 @@
       oldMonthlyJahr1:  'aktuell: 106,67 € / Mon.',
       newMonthly:       '135,54 €',
       newMonthlyJahr:   'davon Kreditrate: 151,87 € / Mon.',
-      orangeNetSub:     'Ø über 20 Jahre inkl. 4,0 % Preissteigerung',
+      orangeNetSub:     'monatlich verfügbar',
+      growToday:        '122,99 €',
+      growY20:          '211,54 €',
+      growFoot:         'bei 4,0 % Strompreissteigerung p.a. · Brutto-Stromersparnis',
       breakEvenLabel:   'Break-even (inkl. Kredit)',
       creditLegend:     'Kreditlaufzeit (10 J.)',
       selfConsumption:  '3.000 kWh',
