@@ -326,6 +326,17 @@
         else if (row.kumVal >= 0)  tr.classList.add('pos');
         else                       tr.classList.add('mixed');
 
+        /* Wert-Zellen nach tatsächlichem Vorzeichen einfärben (nicht nach Zeilentyp).
+           Sonst erscheinen positive Jahresbilanzen während der Kreditlaufzeit rot.
+           Break-even-Zeile behält ihr durchgehendes Grün aus dem CSS. */
+        if (!row.isBreakEven) {
+          var GREEN = '#078743', RED = '#ef2d20';
+          var cashCell = tr.querySelector('.cash');
+          if (cashCell) cashCell.style.color = row.netVal >= 0 ? GREEN : RED;
+          var balCell = tr.querySelector('.balance');
+          if (balCell) balCell.style.color = row.kumVal >= 0 ? GREEN : RED;
+        }
+
         var yearTd = tr.querySelector('.year') || tr.querySelector('td:first-child');
         if (yearTd) yearTd.textContent = row.isBreakEven ? row.year + ' ✓ Break-even' : String(row.year);
 
