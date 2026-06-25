@@ -46,7 +46,7 @@
 
     /* 20-year table rows (0-indexed, all 20 rows) */
     tableRows20 = [];
-    var startKap = -d.ak;  // immer volle Investition (wie be_plain in index.html)
+    var startKap = loanOn ? -d.ek : -d.ak;  // ehrlicher Cashflow: nur Eigenkapital, Darlehen via Rate getilgt
     var kum = startKap, beFound = false, beYear = -1;
     for (var y = 1; y <= 20; y++) {
       var spY = d.sp * Math.pow(1 + d.ps, y - 1);
@@ -55,7 +55,7 @@
       var ersY = ersEV_y + ersEi_y;
       var rJ = (loanOn && y <= d.lz) ? d.rate * 12 : 0;
       var nJ = ersY - rJ;
-      kum += ersY;
+      kum += nJ;
       if (!beFound && kum >= 0) { beFound = true; beYear = y; }
       tableRows20.push({
         year: y,
@@ -82,7 +82,7 @@
       modules:          d.manz + ' × ' + d.mlei + ' Wp',
       investment:       fe(d.ak),
       equity:           fe(d.ek),
-      netMonthlyAvg:    fe(d.vorteil / 240),
+      netMonthlyAvg:    fe(loanOn ? d.nettoMk : d.ersSum_m),
       annualConsumption:fk(d.jv),
       electricityPrice: fn(d.sp, 3) + ' €/kWh',
       priceIncrease:    d.ps > 0 ? ps100 + ' %' : '–',
@@ -90,11 +90,11 @@
       annualProduction: fk(d.jahrProd),
       selfUseRate:      Math.round(d.enq * 100) + ' %',
       feedInTariff:     fn(d.esv, 3) + ' €/kWh',
-      oldMonthlyAvg:    fe(d.avgAlteMk),
-      oldMonthlyJahr1:  'aktuell: ' + fe(d.alteMk) + ' / Mon.',
-      newMonthly:       fe(d.mitGesamt20 / 240),
-      newMonthlyJahr:   loanOn ? 'davon Kreditrate: ' + fe(d.rate) + ' / Mon.' : (d.neueJk <= 0 ? 'Nettoeinnahme: ' + fe(-d.neueJk) + ' / Jahr' : fe(d.neueJk) + ' / Jahr'),
-      orangeNetSub:     d.ps > 0 ? 'Ø über 20 Jahre inkl. ' + ps100 + ' % Preissteigerung' : 'Ø über 20 Jahre',
+      oldMonthlyAvg:    fe(d.alteMk),
+      oldMonthlyJahr1:  'Stromkosten ohne PV',
+      newMonthly:       fe(loanOn ? d.neuGesamt : d.neueMk),
+      newMonthlyJahr:   loanOn ? 'inkl. Kreditrate ' + fe(d.rate) + ' / Mon.' : 'reine Stromkosten mit PV',
+      orangeNetSub:     loanOn ? 'Ersparnis − Kreditrate / Monat' : 'monatlich verfügbar',
       breakEvenLabel:   loanOn ? 'Break-even (inkl. Kredit)' : 'Break-even',
       creditLegend:     'Kreditlaufzeit (' + d.lz + ' J.)',
       selfConsumption:  fk(d.eigVerb),
@@ -109,8 +109,8 @@
       monthlyRate:      fe(d.rate),
       totalInterest:    fe(d.zinsenGes),
       totalRepayment:   fe(d.rueckGes),
-      ratePlusNewCost:  fe(d.mitGesamt20 / 240),
-      monthlyDifference:(d.cmpDiff >= 0 ? '+ ' : '') + fe(d.cmpDiff),
+      ratePlusNewCost:  fe(loanOn ? d.neuGesamt : d.neueMk),
+      monthlyDifference:(d.nettoMk >= 0 ? '+ ' : '') + fe(d.nettoMk),
     };
 
     nested = {
@@ -174,7 +174,7 @@
     }
 
     /* negative Unterschied → rote Farbe + Pfeil runter */
-    if (d.cmpDiff < 0) {
+    if (d.nettoMk < 0) {
       var ct = document.querySelector('.page-3 .compare-total');
       if (ct) ct.classList.add('negative');
     }

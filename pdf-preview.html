@@ -123,10 +123,10 @@
             <circle cx="36" cy="35" r="7"></circle>
             <path d="M36 31v8M32.5 35H39.5"></path>
           </svg>
-          <div class="kpi-label">Ø Netto / Monat</div>
+          <div class="kpi-label">Netto-Ersparnis / Monat</div>
           <div class="kpi-value green" data-field="netMonthlyAvg">86,17 €</div>
           <div class="kpi-rule"></div>
-          <div class="kpi-sub">Ø über 20 Jahre</div>
+          <div class="kpi-sub" data-field="orangeNetSub">monatlich verfügbar</div>
         </div>
       </article>
     </section>
@@ -207,9 +207,9 @@
         <div class="result-top">
           <div class="result-box old">
             <div>
-              <div class="label">Ø Alt / Monat (20 J.)</div>
+              <div class="label">Alt / Monat</div>
               <div class="big" data-bind="results.oldMonthly">158,82 €</div>
-              <div class="sub" data-field="oldMonthlyJahr1">1.280,00 € / Jahr 1</div>
+              <div class="sub" data-field="oldMonthlyJahr1">Stromkosten ohne PV</div>
             </div>
           </div>
           <div class="result-box new">
@@ -223,9 +223,9 @@
   
         <div class="orange-result">
           <div>
-            <div class="label">Ø Netto-Ersparnis / Monat (20 J.)</div>
+            <div class="label">Netto-Ersparnis / Monat</div>
             <div class="big" data-bind="results.netMonthly">86,17 €</div>
-            <div class="sub" data-field="orangeNetSub">Ø über 20 Jahre inkl. 4,0 % Preissteigerung</div>
+            <div class="sub" data-field="orangeNetSub">monatlich verfügbar</div>
           </div>
         </div>
   
@@ -409,9 +409,9 @@
         <article class="card green-summary">
           <div class="circle-icon"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="3"><path d="M16 61V45M29 61V35M42 61V25M55 61V18"></path><path d="M17 38 31 27l11 8 17-21"></path><path d="M55 14h9v9"></path><circle cx="56" cy="55" r="15"></circle><path d="M56 45v20M62 50c-2-2-10-3-10 3 0 5 9 4 9 9 0 6-8 5-11 2"></path></svg></div>
           <div>
-            <div class="summary-label">Ø Netto / Monat (20 J.)</div>
+            <div class="summary-label">Netto-Ersparnis / Monat</div>
             <div class="summary-value" data-field="netMonthlyAvg">86,17 €</div>
-            <div class="summary-sub">Ø Ersparnis abzgl.<br>Rate über 20 Jahre</div>
+            <div class="summary-sub" data-field="orangeNetSub">monatlich verfügbar</div>
           </div>
         </article>
   
@@ -420,11 +420,11 @@
           <div class="compare-list">
             <div class="compare-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
-              <span>Ø Frühere Stromkosten (20 J.)</span><strong data-field="oldMonthlyAvg">158,82 €</strong>
+              <span>Frühere Stromkosten / Monat</span><strong data-field="oldMonthlyAvg">158,82 €</strong>
             </div>
             <div class="compare-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v6M16 2v6M6 8h12v4a6 6 0 0 1-12 0V8Z"></path><path d="M12 18v4"></path></svg>
-              <span>Ø Neue Kosten / Monat (20 J.)</span><strong data-field="ratePlusNewCost">135,54 €</strong>
+              <span>Neue Kosten / Monat</span><strong data-field="ratePlusNewCost">135,54 €</strong>
             </div>
             <div class="compare-total">
               <span>Unterschied</span><strong data-field="monthlyDifference">+ 23,27 €</strong>
@@ -439,7 +439,7 @@
       <div class="info-icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M32 7v8M32 49v8M14 14l6 6M44 44l6 6M7 32h8M49 32h8M14 50l6-6M44 20l6-6"></path><path d="M22 31a10 10 0 1 1 17 7c-2 2-3 4-3 7h-8c0-3-1-5-3-7a10 10 0 0 1-3-7Z"></path><path d="M28 51h8M29 57h6"></path></svg></div>
       <div class="info-text">
         <strong>So interpretieren Sie die Finanzierung</strong>
-        <p>Alle Kosten (Investition, Zinsen, Reststrom abzüglich Einspeisung) auf 20 Jahre verteilt ergeben durchschnittlich <span data-field="ratePlusNewCost">135,54 €</span> pro Monat – gegenüber <span data-field="oldMonthlyAvg">158,82 €</span> ohne PV. Die monatliche Netto-Ersparnis über 20 Jahre beträgt damit <span data-field="netMonthlyAvg">86,17 €</span>.</p>
+        <p>Ihre monatliche Belastung mit PV (Kreditrate zuzüglich Reststrom abzüglich Einspeisung) beträgt <span data-field="ratePlusNewCost">135,54 €</span> – gegenüber <span data-field="oldMonthlyAvg">158,82 €</span> Stromkosten ohne PV. Daraus ergibt sich eine monatliche Netto-Ersparnis von <span data-field="netMonthlyAvg">86,17 €</span>. Nach Ablauf der Kreditlaufzeit entfällt die Rate – Ihre Ersparnis steigt entsprechend deutlich.</p>
       </div>
     </article>
   </section>
