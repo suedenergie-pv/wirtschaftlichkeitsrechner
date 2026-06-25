@@ -1707,6 +1707,12 @@ p {
   font-size: 14px;
   font-weight: 720;
 }
+.page-2 .result-row .row-sub {
+  color: #8a93a3;
+  font-weight: 600;
+  font-size: 0.86em;
+  margin-left: 6px;
+}
 .page-2 .result-row.divider {
   margin-top: 7px;
   padding-top: 14px;

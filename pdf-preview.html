@@ -246,11 +246,8 @@
         </div>
 
         <div class="result-list">
-          <div class="result-row"><span>Eigenverbrauch</span><strong data-bind="results.ownUseKwh">3.000 kWh</strong></div>
-          <div class="result-row"><span>Einspeisung</span><strong data-bind="results.feedInKwh">6.614 kWh</strong></div>
-          <div class="result-row"><span>Stromkosten ohne PV (20 J.)</span><strong data-bind="results.costWithoutPv">38.115,94 €</strong></div>
-          <div class="result-row"><span>Kosten mit PV (20 J.)</span><strong data-bind="results.costWithPv">14.211,15 €</strong></div>
-          <div class="result-row"><span data-field="breakEvenLabel">Break-even (inkl. Kredit)</span><strong data-bind="results.breakEven">10 Jahre</strong></div>
+          <div class="result-row"><span>Eigenverbrauch</span><strong><span data-bind="results.ownUseKwh">3.000 kWh</span><span class="row-sub" data-bind="results.ownUseEur"> · 80,00 € / Mon.</span></strong></div>
+          <div class="result-row"><span>Einspeisung</span><strong><span data-bind="results.feedInKwh">6.614 kWh</span><span class="row-sub" data-bind="results.feedInEur"> · 42,99 € / Mon.</span></strong></div>
           <div class="result-row divider benefit"><span>Gesamtvorteil (20 J.)</span><strong data-bind="results.totalBenefit">23.904,80 €</strong></div>
         </div>
       </section>
