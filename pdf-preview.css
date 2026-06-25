@@ -1679,6 +1679,18 @@ p {
   text-align: center;
   margin-top: 8px;
 }
+/* negative Netto-Ersparnis → rot */
+.kpi-value.neg, .summary-value.neg {
+  color: #dc2626 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.page-2 .orange-result.negative {
+  background: linear-gradient(135deg, #d62f1d, #b91c1c) !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 .page-2 .result-list {
   margin-top: 16px;
 }

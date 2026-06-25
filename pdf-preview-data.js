@@ -182,6 +182,14 @@
       if (ct) ct.classList.add('negative');
     }
 
+    /* negative Netto-Ersparnis → rot signalisieren (Seite 1 Cover, Seite 2 Box, Seite 3 Summary) */
+    var netNeg = (loanOn ? d.nettoMk : d.ersSum_m) < 0;
+    if (netNeg) {
+      document.querySelectorAll('[data-field="netMonthlyAvg"]').forEach(function (el) { el.classList.add('neg'); });
+      var orangeBox = document.querySelector('.page-2 .orange-result');
+      if (orangeBox) orangeBox.classList.add('negative');
+    }
+
     /* update "Kreditlaufzeit (X J.)" in page 4 legend */
     if (loanOn) {
       var orangeBox = document.querySelector('.page-4 .legend-item .legend-box.orange');
