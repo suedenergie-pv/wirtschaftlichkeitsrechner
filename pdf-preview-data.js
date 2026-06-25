@@ -46,7 +46,8 @@
 
     /* 20-year table rows (0-indexed, all 20 rows) */
     tableRows20 = [];
-    var startKap = loanOn ? -d.ek : -d.ak;  // ehrlicher Cashflow: nur Eigenkapital, Darlehen via Rate getilgt
+    // Amortisation: Start bei Gesamtkosten der Anlage (inkl. Zinsen), getilgt durch die Stromersparnis
+    var startKap = -(d.ak + d.zinsenGes);
     var kum = startKap, beFound = false, beYear = -1;
     for (var y = 1; y <= 20; y++) {
       var spY = d.sp * Math.pow(1 + d.ps, y - 1);
@@ -54,8 +55,7 @@
       var ersEi_y = d.einspm * d.esv;
       var ersY = ersEV_y + ersEi_y;
       var rJ = (loanOn && y <= d.lz) ? d.rate * 12 : 0;
-      var nJ = ersY - rJ;
-      kum += nJ;
+      kum += ersY;
       if (!beFound && kum >= 0) { beFound = true; beYear = y; }
       tableRows20.push({
         year: y,
@@ -63,11 +63,9 @@
         feedIn: fe(ersEi_y),
         totalSavings: fe(ersY),
         loanRate: rJ > 0 ? fe(rJ) : '–',
-        cashFlow: fe(nJ),
         balance: fe(kum),
         isBreakEven: false,
         isLoan: loanOn && y <= d.lz,
-        netVal: nJ,
         kumVal: kum,
       });
     }
@@ -340,13 +338,10 @@
         else if (row.kumVal >= 0)  tr.classList.add('pos');
         else                       tr.classList.add('mixed');
 
-        /* Wert-Zellen nach tatsächlichem Vorzeichen einfärben (nicht nach Zeilentyp).
-           Sonst erscheinen positive Jahresbilanzen während der Kreditlaufzeit rot.
+        /* Gesamtstand nach Vorzeichen einfärben: rot bis Break-even, grün danach.
            Break-even-Zeile behält ihr durchgehendes Grün aus dem CSS. */
         if (!row.isBreakEven) {
           var GREEN = '#078743', RED = '#ef2d20';
-          var cashCell = tr.querySelector('.cash');
-          if (cashCell) cashCell.style.color = row.netVal >= 0 ? GREEN : RED;
           var balCell = tr.querySelector('.balance');
           if (balCell) balCell.style.color = row.kumVal >= 0 ? GREEN : RED;
         }

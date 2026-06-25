@@ -3522,6 +3522,9 @@ p {
   text-align: right;
 }
 
+/* 6-Spalten-Layout (Jahresbilanz entfernt): Gesamtstand ist jetzt die letzte Spalte */
+.page-4 .year-table th:nth-child(6) { padding-right: 28px; text-align: right; }
+
 
 
 .page-4 h1 { max-width: none; margin: 0; }
