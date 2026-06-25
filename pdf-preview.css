@@ -3525,6 +3525,15 @@ p {
 /* 6-Spalten-Layout (Jahresbilanz entfernt): Gesamtstand ist jetzt die letzte Spalte */
 .page-4 .year-table th:nth-child(6) { padding-right: 28px; text-align: right; }
 
+/* Erklär-Note unter der Jahrestabelle */
+.page-4 .table-note {
+  margin-top: 14px;
+  padding: 0 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6a7486;
+}
+
 
 
 .page-4 h1 { max-width: none; margin: 0; }
