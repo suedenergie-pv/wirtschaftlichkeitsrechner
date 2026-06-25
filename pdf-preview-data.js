@@ -79,7 +79,7 @@
       customerAddress:  customer.adresse || '–',
       projectAddress:   customer.bauvorhaben || '–',
       systemSize:       fn(d.anlLei, 2) + ' kWp',
-      modules:          d.manz + ' × ' + d.mlei + ' W',
+      modules:          d.manz + ' × ' + d.mlei + ' Wp',
       investment:       fe(d.ak),
       equity:           fe(d.ek),
       netMonthlyAvg:    fe(d.vorteil / 240),
