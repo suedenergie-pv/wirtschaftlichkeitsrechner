@@ -351,7 +351,7 @@
     window.addEventListener('load', function () {
       setTimeout(function () {
         window.print();
-        window.addEventListener('afterprint', function () { window.close(); });
+        window.addEventListener('afterprint', function () { window.history.back(); });
       }, 1200);
     });
   }
