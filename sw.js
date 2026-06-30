@@ -1,7 +1,7 @@
 /* SüdEnergie PV Rechner – Service Worker
    Strategie: network-first (online = immer frische Dateien), Cache-Fallback offline.
    Bei jedem Deploy mit geänderten Dateien CACHE-Version hochzählen. */
-const CACHE = 'se-rechner-v1';
+const CACHE = 'se-rechner-v2';
 const CORE = [
   './',
   './index.html',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', function (e) {
   if (url.origin !== location.origin) return; // Fremd-Origins normal durchreichen
 
   e.respondWith(
-    fetch(req).then(function (res) {
+    fetch(req, { cache: 'no-cache' }).then(function (res) {
       if (res && res.ok) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); }).catch(function () {});
