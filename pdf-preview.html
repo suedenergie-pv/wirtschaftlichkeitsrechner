@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="./pdf-preview.css" />
 </head>
 <body>
+<button id="pdf-back" onclick="history.length>1?history.back():location.href='./index.html'" aria-label="Zurück zum Rechner">← Zurück</button>
+<style>
+  #pdf-back{position:fixed;top:12px;left:12px;z-index:99999;background:#e8603a;color:#fff;border:none;border-radius:10px;padding:.6rem 1rem;font:600 15px 'Segoe UI',system-ui,sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.2);cursor:pointer}
+  @media print{ #pdf-back{display:none!important} }
+</style>
 <main id="pdf-root">
 
 <!-- ═══════════════════════════════════════════════════════════
