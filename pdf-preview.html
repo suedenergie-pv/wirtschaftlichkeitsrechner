@@ -9,10 +9,16 @@
   <link rel="stylesheet" href="./pdf-preview.css" />
 </head>
 <body>
-<button id="pdf-back" onclick="history.length>1?history.back():location.href='./index.html'" aria-label="Zurück zum Rechner">← Zurück</button>
+<div id="pdf-bar">
+  <button id="pdf-back" onclick="history.length>1?history.back():location.href='./index.html'" aria-label="Zurück zum Rechner">← Zurück</button>
+  <button id="pdf-print" aria-label="Drucken oder als PDF speichern">📄 Drucken / Als PDF</button>
+</div>
 <style>
-  #pdf-back{position:fixed;top:12px;left:12px;z-index:99999;background:#e8603a;color:#fff;border:none;border-radius:10px;padding:.6rem 1rem;font:600 15px 'Segoe UI',system-ui,sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.2);cursor:pointer}
-  @media print{ #pdf-back{display:none!important} }
+  #pdf-bar{position:fixed;top:0;left:0;right:0;z-index:99999;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.12);font-family:'Segoe UI',system-ui,sans-serif}
+  #pdf-back{background:#f1f3f5;color:#333;border:none;border-radius:10px;padding:.6rem 1rem;font:600 15px inherit;cursor:pointer}
+  #pdf-print{flex:1;max-width:340px;background:#e8603a;color:#fff;border:none;border-radius:10px;padding:.75rem 1rem;font:700 16px inherit;box-shadow:0 3px 12px rgba(232,96,58,.35);cursor:pointer}
+  #pdf-root{padding-top:60px}
+  @media print{ #pdf-bar{display:none!important} #pdf-root{padding-top:0!important} }
 </style>
 <main id="pdf-root">
 

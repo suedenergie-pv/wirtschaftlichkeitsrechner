@@ -372,15 +372,35 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
-     AUTO-PRINT when ?print=1
+     MOBIL: Vorschau auf Bildschirmbreite skalieren + Druck per Nutzer-Tap.
+     (Kein automatisches window.print() – das stürzt iOS Safari ab.)
+     Im versteckten Desktop-iframe (self !== top) nichts tun – dort druckt
+     das Eltern-Fenster den iframe direkt in voller A4-Größe.
   ══════════════════════════════════════════════════════════════════════════ */
-  if (new URLSearchParams(window.location.search).get('print') === '1') {
-    window.addEventListener('load', function () {
-      setTimeout(function () {
+  if (window.self === window.top) {
+    var root = document.getElementById('pdf-root');
+    var printBtn = document.getElementById('pdf-print');
+
+    var fit = function () {
+      if (!root) return;
+      root.style.zoom = '';
+      if (window.innerWidth <= 820) {
+        var natW = root.scrollWidth || 794;   // breiteste Seite (Titelseite ist breiter)
+        if (natW > window.innerWidth) root.style.zoom = (window.innerWidth / natW).toFixed(4);
+      }
+    };
+    window.addEventListener('load', fit);
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', function () { setTimeout(fit, 200); });
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        if (root) root.style.zoom = '';   // Druck in voller A4-Größe
         window.print();
-        window.addEventListener('afterprint', function () { window.history.back(); });
-      }, 1200);
-    });
+        setTimeout(fit, 700);             // danach Bildschirm-Ansicht wiederherstellen
+      });
+    }
   }
 
 })();
